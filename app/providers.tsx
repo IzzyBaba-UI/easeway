@@ -2,7 +2,6 @@
 
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SessionProvider } from "next-auth/react";
 import ScrollToTop from "../src/components/ScrollToTop";
 import { ToastProvider } from "../src/contexts/ToastContext";
 
@@ -22,13 +21,11 @@ export default function ClientProviders({
   children: React.ReactNode;
 }) {
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <ScrollToTop />
-          {children}
-        </ToastProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <ScrollToTop />
+        {children}
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }

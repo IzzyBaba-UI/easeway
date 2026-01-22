@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useAuth } from "../../src/hooks/useAuth";
 import { useEffect, useState } from "react";
 import {
   Calendar,
@@ -31,7 +30,6 @@ interface Booking {
 }
 
 const AdminDashboard = () => {
-  const { user, isAuthenticated, isAdmin, isLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,39 +51,8 @@ const AdminDashboard = () => {
       }
     };
 
-    if (isAuthenticated && isAdmin) {
-      fetchBookings();
-    }
-  }, [isAuthenticated, isAdmin]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF3133]"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-h3-mobile md:text-h2-desktop font-axiforma text-[#0E2127] mb-4">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 mb-6 text-body font-uber">
-            You need admin privileges to access this page.
-          </p>
-          <Link
-            href="/"
-            className="bg-[#FF3133] text-white px-6 py-3 rounded-lg hover:bg-[#e62a2c] transition-colors"
-          >
-            Go Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
+    fetchBookings();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -127,7 +94,7 @@ const AdminDashboard = () => {
                 Admin Dashboard
               </h1>
               <p className="text-gray-600 text-body font-uber">
-                Welcome back, {user?.name}
+                Manage bookings and settings
               </p>
             </div>
           </div>
@@ -185,7 +152,7 @@ const AdminDashboard = () => {
                 <p className="text-gray-600 text-body font-uber">
                   Total Bookings
                 </p>
-                <p className="md: font-axiforma text-[#0E2127] text-body font-uber">
+                <p className="text-2xl font-bold text-[#0E2127]">
                   {stats.total}
                 </p>
               </div>
@@ -202,7 +169,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-body font-uber">Pending</p>
-                <p className="md: font-axiforma text-yellow-600 text-body font-uber">
+                <p className="text-2xl font-bold text-yellow-600">
                   {stats.pending}
                 </p>
               </div>
@@ -219,7 +186,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-body font-uber">Confirmed</p>
-                <p className="md: font-axiforma text-green-600 text-body font-uber">
+                <p className="text-2xl font-bold text-green-600">
                   {stats.confirmed}
                 </p>
               </div>
@@ -236,7 +203,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-body font-uber">Completed</p>
-                <p className="md: font-axiforma text-blue-600 text-body font-uber">
+                <p className="text-2xl font-bold text-blue-600">
                   {stats.completed}
                 </p>
               </div>

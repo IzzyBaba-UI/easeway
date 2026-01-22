@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useAuth } from "../../../src/hooks/useAuth";
 import { useEffect, useState } from "react";
 import {
   Clock,
@@ -48,7 +47,6 @@ const dayNames = [
 ];
 
 const AdminDashboard = () => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<
     "settings" | "bookings" | "schedule"
   >("schedule");
@@ -58,7 +56,7 @@ const AdminDashboard = () => {
     breakStart: "",
     breakEnd: "",
     blockedPeriods: [],
-    workingDays: [1, 2, 3, 4, 5], // Monday to Friday
+    workingDays: [1, 2, 3, 4, 5],
     timeSlotDuration: 30,
     isActive: true,
   });
@@ -71,7 +69,6 @@ const AdminDashboard = () => {
     reason: "",
   });
 
-  // Fetch current settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -89,10 +86,8 @@ const AdminDashboard = () => {
       }
     };
 
-    if (isAuthenticated && isAdmin) {
-      fetchSettings();
-    }
-  }, [isAuthenticated, isAdmin]);
+    fetchSettings();
+  }, []);
 
   const handleSaveSettings = async () => {
     setSaving(true);
@@ -151,35 +146,6 @@ const AdminDashboard = () => {
       blockedPeriods: prev.blockedPeriods.filter((_, i) => i !== index),
     }));
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF3133]"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#0E2127] mb-4">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 mb-6 text-body font-uber">
-            You need admin privileges to access this page.
-          </p>
-          <Link
-            href="/"
-            className="bg-[#FF3133] text-white px-6 py-3 rounded-lg hover:bg-[#e62a2c] transition-colors"
-          >
-            Back to Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white">
