@@ -384,3 +384,104 @@ export async function sendPatientConfirmationEmail(
     return { success: false, error };
   }
 }
+
+export interface BookingStatusEmailData {
+  name: string;
+  email: string;
+  service: string;
+  date: string;
+  time: string;
+  confirmationNumber: string;
+  status: "confirmed" | "cancelled";
+}
+
+export async function sendBookingStatusEmail(data: BookingStatusEmailData) {
+  try {
+    const isConfirmed = data.status === "confirmed";
+    const isTBD = data.time === "TBD";
+    const statusColor = isConfirmed ? "#28a745" : "#dc3545";
+    const statusText = isConfirmed ? "Confirmed" : "Cancelled";
+    const statusMessage = isConfirmed
+      ? "Great news! Your appointment has been confirmed."
+      : "We regret to inform you that your appointment has been cancelled.";
+
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #FF3133; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">Appointment ${statusText}</h1>
+          <p style="margin: 5px 0;">Easeway Medicare Physiotherapy Clinic</p>
+        </div>
+        <div style="padding: 20px; background-color: #f9f9f9;">
+          <div style="background-color: ${statusColor}15; border: 1px solid ${statusColor}40; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <p style="margin: 0; color: ${statusColor}; font-size: 16px; font-weight: bold;">${statusMessage}</p>
+          </div>
+          <h2 style="color: #0E2127;">Dear ${data.name},</h2>
+          <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #FF3133; margin-top: 0;">Appointment Details</h3>
+            <p><strong>Service:</strong> ${data.service}</p>
+            ${isTBD ? `<p><strong>Date / Time:</strong> To Be Confirmed</p>` : `<p><strong>Date:</strong> ${data.date}</p><p><strong>Time:</strong> ${data.time}</p>`}
+            <p><strong>Confirmation Number:</strong> ${data.confirmationNumber}</p>
+            <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span></p>
+          </div>
+          ${isConfirmed ? `
+          <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h4 style="color: #0E2127; margin-top: 0;">Reminders:</h4>
+            <ul style="margin: 0; padding-left: 20px;">
+              <li>Please arrive 10 minutes early for your appointment</li>
+              <li>Bring any relevant medical documents or previous scan results</li>
+              <li>Wear comfortable clothing suitable for physical examination</li>
+              <li>If you need to cancel or reschedule, please call us at least 24 hours in advance</li>
+            </ul>
+          </div>` : `
+          <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p style="margin: 0; color: #856404;">If you would like to rebook, please visit our website or contact us directly.</p>
+          </div>`}
+          <div style="text-align: center; margin: 20px 0;">
+            <p><strong>Contact Information:</strong></p>
+            <p>Phone: <a href="tel:+447460091561" style="color: #FF3133;">+44 7460 091561</a></p>
+            <p>Email: <a href="mailto:easeway.physiotherapy@easewaymedicare.co.uk" style="color: #FF3133;">easeway.physiotherapy@easewaymedicare.co.uk</a></p>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
+          <p>Easeway Medicare Physiotherapy Clinic</p>
+        </div>
+      </div>
+    `;
+
+    const subject = `Appointment ${statusText} - ${data.confirmationNumber}`;
+
+    if (EMAIL_SERVICE === "smtp") {
+      const result = await smtpTransporter.sendMail({
+        from: `"Easeway Medicare" <${process.env.SMTP_USER}>`,
+        to: data.email,
+        subject,
+        html: emailContent,
+      });
+      return { success: true, messageId: result.messageId };
+    } else {
+      const resendClient = getResendClient();
+      if (!resendClient) {
+        if (smtpConfigured()) {
+          const result = await smtpTransporter.sendMail({
+            from: `"Easeway Medicare" <${process.env.SMTP_USER}>`,
+            to: data.email,
+            subject,
+            html: emailContent,
+          });
+          return { success: true, messageId: result.messageId, fallback: "smtp" };
+        }
+        return { success: false, skipped: true };
+      }
+      const result = await resendClient.emails.send({
+        from: "Easeway Medicare <easeway.physiotherapy@easewaymedicare.co.uk>",
+        to: [data.email],
+        subject,
+        html: emailContent,
+      });
+      return { success: true, data: result };
+    }
+  } catch (error) {
+    console.error("Failed to send booking status email:", error);
+    return { success: false, error };
+  }
+}

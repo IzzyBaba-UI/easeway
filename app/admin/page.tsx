@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useAuth } from "../../src/hooks/useAuth";
 import { useEffect, useState } from "react";
 import {
   Calendar,
@@ -10,8 +9,12 @@ import {
   CheckCircle,
   ArrowLeft,
   Settings,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
+import { useAdminAuth } from "../../src/contexts/AdminAuthContext";
+import AdminLogin from "../../src/components/admin/AdminLogin";
+import { adminFetch } from "../../lib/adminFetch";
 
 interface Booking {
   id: string;
@@ -31,15 +34,17 @@ interface Booking {
 }
 
 const AdminDashboard = () => {
-  const { user, isAuthenticated, isAdmin, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, logout } = useAdminAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const fetchBookings = async () => {
       try {
-        const response = await fetch("/api/admin/bookings");
+        const response = await adminFetch("/api/admin/bookings");
         if (response.ok) {
           const data = await response.json();
           setBookings(data.bookings);
@@ -53,52 +58,33 @@ const AdminDashboard = () => {
       }
     };
 
-    if (isAuthenticated && isAdmin) {
-      fetchBookings();
-    }
-  }, [isAuthenticated, isAdmin]);
+    fetchBookings();
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF3133]"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF3133]"></div>
       </div>
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-h3-mobile md:text-h2-desktop font-axiforma text-[#0E2127] mb-4">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 mb-6 text-body font-uber">
-            You need admin privileges to access this page.
-          </p>
-          <Link
-            href="/"
-            className="bg-[#FF3133] text-white px-6 py-3 rounded-lg hover:bg-[#e62a2c] transition-colors"
-          >
-            Go Home
-          </Link>
-        </div>
-      </div>
-    );
+  if (!isAuthenticated) {
+    return <AdminLogin />;
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-700";
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-700";
       case "cancelled":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-700";
       case "completed":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 text-blue-700";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -110,222 +96,209 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white">
+    <div className="min-h-screen bg-gray-50 admin-page">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-3 text-[#0E2127] hover:text-[#FF3133] transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-[#FF3133] transition-colors text-sm"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back to Home</span>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to Home</span>
             </Link>
-            <div className="text-right">
-              <h1 className="text-h4-mobile md:text-h3-small font-axiforma text-[#0E2127]">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600 text-body font-uber">
-                Welcome back, {user?.name}
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <h1 className="text-lg font-semibold text-gray-900">
+                  Admin Dashboard
+                </h1>
+                <p className="text-xs text-gray-500 hidden sm:block">
+                  Manage bookings and settings
+                </p>
+              </div>
+              <button
+                onClick={logout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-[#FF3133] hover:bg-red-50 rounded-md transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-body-lg font-semibold text-[#0E2127] mb-4">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              href="/admin/dashboard"
-              className="bg-[#FF3133] hover:bg-[#e62a2c] text-white p-4 rounded-xl transition-colors flex items-center gap-3"
-            >
-              <Settings className="w-5 h-5" />
-              <div>
-                <h3 className="font-semibold">Clinic Settings</h3>
-                <p className="text-body text-red-100 font-uber">
-                  Manage hours & availability
-                </p>
-              </div>
-            </Link>
-
-            <div className="bg-gray-100 text-gray-500 p-4 rounded-xl flex items-center gap-3">
-              <Users className="w-5 h-5" />
-              <div>
-                <h3 className="font-semibold">Staff Management</h3>
-                <p className="text-body font-uber">Coming soon</p>
-              </div>
+        <div className="mb-6">
+          <Link
+            href="/admin/dashboard"
+            className="inline-flex items-center gap-3 bg-[#FF3133] hover:bg-[#e62a2c] text-white px-4 py-3 rounded-lg transition-colors"
+          >
+            <Settings className="w-5 h-5" />
+            <div>
+              <h3 className="text-sm font-medium">Clinic Settings</h3>
+              <p className="text-xs text-white/80">
+                Manage hours & availability
+              </p>
             </div>
-
-            <div className="bg-gray-100 text-gray-500 p-4 rounded-xl flex items-center gap-3">
-              <Calendar className="w-5 h-5" />
-              <div>
-                <h3 className="font-semibold">Reports</h3>
-                <p className="text-body font-uber">Coming soon</p>
-              </div>
-            </div>
-          </div>
+          </Link>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="bg-white rounded-lg shadow-sm p-4"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-body font-uber">
-                  Total Bookings
-                </p>
-                <p className="md: font-axiforma text-[#0E2127] text-body font-uber">
+                <p className="text-xs text-gray-500">Total</p>
+                <p className="text-xl font-semibold text-gray-900">
                   {stats.total}
                 </p>
               </div>
-              <Calendar className="w-8 h-8 text-[#FF3133]" />
+              <Calendar className="w-5 h-5 text-[#FF3133]" />
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            transition={{ delay: 0.05 }}
+            className="bg-white rounded-lg shadow-sm p-4"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-body font-uber">Pending</p>
-                <p className="md: font-axiforma text-yellow-600 text-body font-uber">
+                <p className="text-xs text-gray-500">Pending</p>
+                <p className="text-xl font-semibold text-yellow-600">
                   {stats.pending}
                 </p>
               </div>
-              <Clock className="w-8 h-8 text-yellow-600" />
+              <Clock className="w-5 h-5 text-yellow-500" />
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-lg shadow-sm p-4"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-body font-uber">Confirmed</p>
-                <p className="md: font-axiforma text-green-600 text-body font-uber">
+                <p className="text-xs text-gray-500">Confirmed</p>
+                <p className="text-xl font-semibold text-green-600">
                   {stats.confirmed}
                 </p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            transition={{ delay: 0.15 }}
+            className="bg-white rounded-lg shadow-sm p-4"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-body font-uber">Completed</p>
-                <p className="md: font-axiforma text-blue-600 text-body font-uber">
+                <p className="text-xs text-gray-500">Completed</p>
+                <p className="text-xl font-semibold text-blue-600">
                   {stats.completed}
                 </p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <Users className="w-5 h-5 text-blue-500" />
             </div>
           </motion.div>
         </div>
 
         {/* Bookings Table */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white rounded-xl shadow-lg overflow-hidden"
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-lg shadow-sm overflow-hidden"
         >
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-body-lg font-semibold text-[#0E2127]">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h2 className="text-sm font-medium text-gray-900">
               Recent Bookings
             </h2>
           </div>
 
           {loading ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF3133] mx-auto"></div>
+            <div className="p-6 text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#FF3133] mx-auto"></div>
             </div>
           ) : error ? (
-            <div className="p-8 text-center text-red-600">{error}</div>
+            <div className="p-6 text-center text-sm text-red-600">{error}</div>
           ) : bookings.length === 0 ? (
-            <div className="p-8 text-center text-gray-600">
+            <div className="p-6 text-center text-sm text-gray-500">
               No bookings found
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Patient
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Service
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
-                      Date & Time
+                    <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Contact
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-100">
                   {bookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div>
-                          <div className="text-base font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900">
                             {booking.name}
                           </div>
-                          <div className="text-base text-gray-500">
+                          <div className="text-xs text-gray-500 truncate max-w-[150px]">
                             {booking.email}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-base text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
+                        <div className="text-sm text-gray-700">
                           {booking.service}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-base text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
                           {booking.date}
                         </div>
-                        <div className="text-base text-gray-500">
+                        <div className="text-xs text-gray-500">
                           {booking.time}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <span
-                          className={`inline-flex px-2 py-1 text-base font-semibold rounded-full ${getStatusColor(
+                          className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
                             booking.status
                           )}`}
                         >
                           {booking.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm hidden md:table-cell">
                         <a
                           href={`tel:${booking.phone}`}
                           className="text-[#FF3133] hover:underline"

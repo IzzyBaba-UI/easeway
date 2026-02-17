@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
+import { authenticateAdmin } from "../../../../lib/adminAuth";
 
 interface BlockedPeriod {
   start: string;
@@ -21,21 +20,11 @@ interface ClinicSettingsData {
 }
 
 // GET - Fetch current clinic settings
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Access denied. Admin role required." },
-        { status: 403 }
-      );
-    }
-
     // Get clinic settings (should have only one record)
     const settings = await prisma.clinicSettings.findFirst({
       orderBy: {
@@ -82,20 +71,10 @@ export async function GET() {
 
 // POST - Update clinic settings
 export async function POST(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Access denied. Admin role required." },
-        { status: 403 }
-      );
-    }
-
     const body: ClinicSettingsData = await request.json();
     const {
       openingTime,

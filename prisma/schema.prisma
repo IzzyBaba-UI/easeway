@@ -47,7 +47,6 @@ model User {
   accounts      Account[]
   sessions      Session[]
   bookings      Booking[]
-  blockedSlots  BlockedSlot[]
 }
 
 model VerificationToken {
@@ -75,6 +74,7 @@ model Booking {
   medicalHistory  String?
   currentMedications String?
   previousPhysiotherapy String?
+  notes           String?
   status          String   @default("pending") // pending, confirmed, cancelled, completed
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -101,11 +101,9 @@ model BlockedSlot {
   date      String   // Format: "YYYY-MM-DD"
   time      String   // Format: "HH:MM"
   reason    String   // Reason for blocking the slot
-  createdBy String   // User ID of admin who created the block
+  createdBy String   @default("admin")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user      User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 
   @@unique([date, time]) // Ensure no duplicate blocks for same date/time
 }

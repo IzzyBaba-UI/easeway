@@ -1,36 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
+import { authenticateAdmin } from "../../../../lib/adminAuth";
+import { sendBookingStatusEmail } from "../../../../lib/email";
 
 export async function GET(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Access denied. Admin role required." },
-        { status: 403 }
-      );
-    }
-
-    // Get URL search parameters
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
+    const search = url.searchParams.get("search");
+    const dateFrom = url.searchParams.get("dateFrom");
+    const dateTo = url.searchParams.get("dateTo");
     const limit = parseInt(url.searchParams.get("limit") || "50");
     const offset = parseInt(url.searchParams.get("offset") || "0");
 
-    // Build where clause
-    const where: { status?: string } = {};
+    const where: Record<string, unknown> = {};
     if (status) {
       where.status = status;
     }
 
-    // Get bookings with pagination
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search } },
+      ];
+    }
+
+    if (dateFrom || dateTo) {
+      where.date = {};
+      if (dateFrom) (where.date as Record<string, string>).gte = dateFrom;
+      if (dateTo) (where.date as Record<string, string>).lte = dateTo;
+    }
+
     const [bookings, total] = await Promise.all([
       prisma.booking.findMany({
         where,
@@ -52,7 +56,6 @@ export async function GET(request: NextRequest) {
       prisma.booking.count({ where }),
     ]);
 
-    // Add confirmation numbers to bookings
     const bookingsWithConfirmation = bookings.map((booking) => ({
       ...booking,
       confirmationNumber: booking.id.slice(-8).toUpperCase(),
@@ -78,24 +81,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
     const { bookingId, status, notes } = body;
 
@@ -106,18 +95,16 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Validate status
     const validStatuses = ["pending", "confirmed", "cancelled", "completed"];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
-    // Update booking
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
       data: {
         status,
-        ...(notes && { notes }),
+        ...(notes !== undefined && { notes }),
         updatedAt: new Date(),
       },
       include: {
@@ -130,6 +117,21 @@ export async function PATCH(request: NextRequest) {
         },
       },
     });
+
+    // Send email notification for status changes (non-blocking)
+    if (status === "confirmed" || status === "cancelled") {
+      sendBookingStatusEmail({
+        name: updatedBooking.name,
+        email: updatedBooking.email,
+        service: updatedBooking.service,
+        date: updatedBooking.date,
+        time: updatedBooking.time,
+        confirmationNumber: updatedBooking.id.slice(-8).toUpperCase(),
+        status,
+      }).catch((err) =>
+        console.error("Failed to send status change email:", err)
+      );
+    }
 
     return NextResponse.json({
       success: true,
