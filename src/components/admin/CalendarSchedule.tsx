@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import ErrorState from "../ui/ErrorState";
+import { adminFetch } from "../../../lib/adminFetch";
 
 interface Booking {
   id: string;
@@ -37,6 +38,17 @@ interface BlockedSlot {
   createdAt?: string;
 }
 
+interface ClinicSettings {
+  openingTime: string;
+  closingTime: string;
+  breakStart?: string;
+  breakEnd?: string;
+  blockedPeriods?: { start: string; end: string; reason: string }[];
+  workingDays: number[];
+  timeSlotDuration: number;
+  isActive: boolean;
+}
+
 interface CalendarScheduleProps {
   refreshInterval?: number;
 }
@@ -56,13 +68,66 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
   } | null>(null);
   const [blockReason, setBlockReason] = useState("");
   const [showBlockModal, setShowBlockModal] = useState(false);
+  const [clinicSettings, setClinicSettings] = useState<ClinicSettings>({
+    openingTime: "09:00",
+    closingTime: "17:00",
+    workingDays: [1, 2, 3, 4, 5],
+    timeSlotDuration: 30,
+    isActive: true,
+  });
 
-  // Generate time slots (9 AM to 5 PM, 30-minute intervals)
+  // Generate time slots based on clinic settings
   const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 9; hour < 17; hour++) {
-      slots.push(`${hour.toString().padStart(2, "0")}:00`);
-      slots.push(`${hour.toString().padStart(2, "0")}:30`);
+    const slots: string[] = [];
+    const [openHour, openMin] = clinicSettings.openingTime
+      .split(":")
+      .map(Number);
+    const [closeHour, closeMin] = clinicSettings.closingTime
+      .split(":")
+      .map(Number);
+    const duration = clinicSettings.timeSlotDuration || 30;
+
+    let currentMinutes = openHour * 60 + openMin;
+    const endMinutes = closeHour * 60 + closeMin;
+
+    while (currentMinutes < endMinutes) {
+      const h = Math.floor(currentMinutes / 60);
+      const m = currentMinutes % 60;
+      const timeStr = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+
+      // Skip break periods
+      let inBreak = false;
+      if (clinicSettings.breakStart && clinicSettings.breakEnd) {
+        const [bsH, bsM] = clinicSettings.breakStart.split(":").map(Number);
+        const [beH, beM] = clinicSettings.breakEnd.split(":").map(Number);
+        const breakStartMin = bsH * 60 + bsM;
+        const breakEndMin = beH * 60 + beM;
+        if (currentMinutes >= breakStartMin && currentMinutes < breakEndMin) {
+          inBreak = true;
+        }
+      }
+
+      // Skip blocked periods from settings
+      if (clinicSettings.blockedPeriods) {
+        for (const period of clinicSettings.blockedPeriods) {
+          if (period.start && period.end) {
+            const [psH, psM] = period.start.split(":").map(Number);
+            const [peH, peM] = period.end.split(":").map(Number);
+            const pStartMin = psH * 60 + psM;
+            const pEndMin = peH * 60 + peM;
+            if (currentMinutes >= pStartMin && currentMinutes < pEndMin) {
+              inBreak = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!inBreak) {
+        slots.push(timeStr);
+      }
+
+      currentMinutes += duration;
     }
     return slots;
   };
@@ -74,23 +139,41 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
     const week = [];
     const startOfWeek = new Date(date);
     const day = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Monday start
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
     startOfWeek.setDate(diff);
 
     for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      week.push(day);
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      week.push(d);
     }
     return week;
   };
 
   const weekDays = getWeekDays(currentDate);
 
+  const isWorkingDay = (date: Date) => {
+    return clinicSettings.workingDays.includes(date.getDay());
+  };
+
+  const fetchClinicSettings = async () => {
+    try {
+      const response = await adminFetch("/api/admin/settings");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.settings) {
+          setClinicSettings(data.settings);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching clinic settings:", err);
+    }
+  };
+
   const fetchBookings = async () => {
     try {
       setError("");
-      const response = await fetch("/api/admin/bookings");
+      const response = await adminFetch("/api/admin/bookings");
 
       if (!response.ok) {
         throw new Error("Failed to fetch bookings");
@@ -106,7 +189,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
 
   const fetchBlockedSlots = async () => {
     try {
-      const response = await fetch("/api/admin/blocked-slots");
+      const response = await adminFetch("/api/admin/blocked-slots");
 
       if (response.ok) {
         const data = await response.json();
@@ -119,7 +202,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
 
   const blockTimeSlot = async (date: string, time: string, reason: string) => {
     try {
-      const response = await fetch("/api/admin/blocked-slots", {
+      const response = await adminFetch("/api/admin/blocked-slots", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -147,7 +230,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
 
   const unblockTimeSlot = async (date: string, time: string) => {
     try {
-      const response = await fetch("/api/admin/blocked-slots", {
+      const response = await adminFetch("/api/admin/blocked-slots", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -172,13 +255,16 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchBookings(), fetchBlockedSlots()]);
+      await Promise.all([
+        fetchClinicSettings(),
+        fetchBookings(),
+        fetchBlockedSlots(),
+      ]);
       setLoading(false);
     };
 
     loadData();
 
-    // Set up auto-refresh
     const interval = setInterval(() => {
       fetchBookings();
       fetchBlockedSlots();
@@ -234,16 +320,12 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
     const blocked = isSlotBlocked(date, time);
 
     if (booking) {
-      // Show booking details - could open a modal or navigate
-      console.log("Show booking details:", booking);
       return;
     }
 
     if (blocked) {
-      // Unblock the slot
       unblockTimeSlot(date, time);
     } else {
-      // Block the slot
       setSelectedSlot({ date, time });
       setShowBlockModal(true);
     }
@@ -261,6 +343,8 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
           return "bg-yellow-100 border-yellow-300 text-yellow-800";
         case "cancelled":
           return "bg-red-100 border-red-300 text-red-800";
+        case "completed":
+          return "bg-blue-100 border-blue-300 text-blue-800";
         default:
           return "bg-blue-100 border-blue-300 text-blue-800";
       }
@@ -318,30 +402,52 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
       <div className="font-medium text-gray-700 p-1 text-xs">Time</div>
 
       {/* Day headers */}
-      {weekDays.map((day) => (
-        <div key={day.toISOString()} className="text-center p-1">
-          <div className="font-medium text-gray-900 text-xs">
-            {formatDateDisplay(day)}
+      {weekDays.map((day) => {
+        const working = isWorkingDay(day);
+        return (
+          <div key={day.toISOString()} className="text-center p-1">
+            <div
+              className={`font-medium text-xs ${working ? "text-gray-900" : "text-gray-400"}`}
+            >
+              {formatDateDisplay(day)}
+            </div>
+            {!working && (
+              <span className="text-xs text-red-400 font-medium">Closed</span>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Time slots */}
       {timeSlots.map((time) => (
         <React.Fragment key={time}>
           {/* Time label */}
-          <div className="p-1 text-xs text-gray-700 border-r">
-            {time}
-          </div>
+          <div className="p-1 text-xs text-gray-700 border-r">{time}</div>
 
           {/* Day slots */}
-          {weekDays.map((day) => (
-            <TimeSlot
-              key={`${formatDate(day)}-${time}`}
-              date={formatDate(day)}
-              time={time}
-            />
-          ))}
+          {weekDays.map((day) => {
+            const dateStr = formatDate(day);
+            const working = isWorkingDay(day);
+
+            if (!working) {
+              return (
+                <div
+                  key={`${dateStr}-${time}`}
+                  className="p-1.5 border rounded text-xs bg-gray-100 border-gray-200 text-gray-400 min-h-[50px] flex items-center justify-center"
+                >
+                  <span className="text-xs">Closed</span>
+                </div>
+              );
+            }
+
+            return (
+              <TimeSlot
+                key={`${dateStr}-${time}`}
+                date={dateStr}
+                time={time}
+              />
+            );
+          })}
         </React.Fragment>
       ))}
     </div>
@@ -358,13 +464,29 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
             day: "numeric",
           })}
         </h3>
+        {!isWorkingDay(currentDate) && (
+          <p className="text-xs text-red-500 mt-1 font-medium">
+            Clinic is closed on this day
+          </p>
+        )}
       </div>
 
-      <div className="space-y-1.5">
-        {timeSlots.map((time) => (
-          <TimeSlot key={time} date={formatDate(currentDate)} time={time} />
-        ))}
-      </div>
+      {isWorkingDay(currentDate) ? (
+        <div className="space-y-1.5">
+          {timeSlots.map((time) => (
+            <TimeSlot
+              key={time}
+              date={formatDate(currentDate)}
+              time={time}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-gray-400">
+          <CalendarIcon className="w-10 h-10 mx-auto mb-3" />
+          <p className="text-sm">This is a non-working day.</p>
+        </div>
+      )}
     </div>
   );
 
@@ -449,7 +571,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
     );
   }
 
-  if (error) {
+  if (error && bookings.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
         <ErrorState
@@ -458,7 +580,11 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
           onRetry={() => {
             setError("");
             setLoading(true);
-            Promise.all([fetchBookings(), fetchBlockedSlots()]).finally(() => {
+            Promise.all([
+              fetchClinicSettings(),
+              fetchBookings(),
+              fetchBlockedSlots(),
+            ]).finally(() => {
               setLoading(false);
             });
           }}
@@ -470,6 +596,17 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Clinic Inactive Warning */}
+      {!clinicSettings.isActive && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <p className="text-xs text-amber-800">
+            The clinic is currently marked as <strong>inactive</strong>. No new
+            bookings can be made by patients.
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -477,7 +614,9 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
             Schedule Management
           </h2>
           <p className="text-xs text-gray-500">
-            View bookings and manage availability
+            View bookings and manage availability (
+            {clinicSettings.openingTime} - {clinicSettings.closingTime},{" "}
+            {clinicSettings.timeSlotDuration}min slots)
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -564,12 +703,20 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
           <span className="text-xs text-gray-700">Pending</span>
         </div>
         <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
+          <span className="text-xs text-gray-700">Completed</span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-gray-200 border border-gray-400 rounded"></div>
           <span className="text-xs text-gray-700">Blocked</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-white border border-gray-200 rounded"></div>
           <span className="text-xs text-gray-700">Available</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
+          <span className="text-xs text-gray-700">Closed</span>
         </div>
       </div>
 
@@ -591,11 +738,16 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
         <div className="flex items-start gap-2">
           <CalendarIcon className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-xs font-medium text-blue-900 mb-1">How to use:</h4>
+            <h4 className="text-xs font-medium text-blue-900 mb-1">
+              How to use:
+            </h4>
             <ul className="text-xs text-blue-700 space-y-0.5">
-              <li>• Click on an empty slot to block it</li>
-              <li>• Click on a blocked slot to unblock</li>
-              <li>• Past slots cannot be modified</li>
+              <li>Click on an empty slot to block it</li>
+              <li>Click on a blocked slot to unblock</li>
+              <li>Past slots cannot be modified</li>
+              <li>
+                Grey &quot;Closed&quot; columns indicate non-working days
+              </li>
             </ul>
           </div>
         </div>

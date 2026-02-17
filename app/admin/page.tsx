@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useAdminAuth } from "../../src/contexts/AdminAuthContext";
 import AdminLogin from "../../src/components/admin/AdminLogin";
+import { adminFetch } from "../../lib/adminFetch";
 
 interface Booking {
   id: string;
@@ -43,7 +44,7 @@ const AdminDashboard = () => {
 
     const fetchBookings = async () => {
       try {
-        const response = await fetch("/api/admin/bookings");
+        const response = await adminFetch("/api/admin/bookings");
         if (response.ok) {
           const data = await response.json();
           setBookings(data.bookings);

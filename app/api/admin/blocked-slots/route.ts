@@ -1,37 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
+import { authenticateAdmin } from "../../../../lib/adminAuth";
 
 export async function GET(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    // Get URL search parameters
     const url = new URL(request.url);
     const date = url.searchParams.get("date");
 
-    // Build where clause
     const where: { date?: string } = {};
     if (date) {
       where.date = date;
     }
 
-    // Get blocked slots
     const blockedSlots = await prisma.blockedSlot.findMany({
       where,
       orderBy: [{ date: "asc" }, { time: "asc" }],
@@ -51,23 +34,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
     const { date, time, reason } = body;
 
@@ -78,7 +48,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate date format (YYYY-MM-DD)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return NextResponse.json(
         { error: "Invalid date format. Use YYYY-MM-DD" },
@@ -86,7 +55,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate time format (HH:MM)
     if (!/^\d{2}:\d{2}$/.test(time)) {
       return NextResponse.json(
         { error: "Invalid time format. Use HH:MM" },
@@ -94,12 +62,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if slot is already blocked
     const existingBlock = await prisma.blockedSlot.findFirst({
-      where: {
-        date,
-        time,
-      },
+      where: { date, time },
     });
 
     if (existingBlock) {
@@ -109,14 +73,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if slot has an existing booking
     const existingBooking = await prisma.booking.findFirst({
       where: {
         date,
         time,
-        status: {
-          in: ["pending", "confirmed"],
-        },
+        status: { in: ["pending", "confirmed"] },
       },
     });
 
@@ -127,26 +88,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create blocked slot
     const blockedSlot = await prisma.blockedSlot.create({
       data: {
         date,
         time,
         reason: reason.trim(),
-        createdBy: session.user.id,
+        createdBy: "admin",
       },
     });
 
     return NextResponse.json({
       success: true,
       message: "Time slot blocked successfully",
-      blockedSlot: {
-        id: blockedSlot.id,
-        date: blockedSlot.date,
-        time: blockedSlot.time,
-        reason: blockedSlot.reason,
-        createdAt: blockedSlot.createdAt,
-      },
+      blockedSlot,
     });
   } catch (error) {
     console.error("Error blocking time slot:", error);
@@ -158,23 +112,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
     const { date, time, id } = body;
 
@@ -191,10 +132,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Find and delete the blocked slot
-    const deletedSlot = await prisma.blockedSlot.deleteMany({
-      where,
-    });
+    const deletedSlot = await prisma.blockedSlot.deleteMany({ where });
 
     if (deletedSlot.count === 0) {
       return NextResponse.json(

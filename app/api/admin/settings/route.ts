@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { authenticateAdmin } from "../../../../lib/adminAuth";
 
 interface BlockedPeriod {
   start: string;
@@ -19,7 +20,10 @@ interface ClinicSettingsData {
 }
 
 // GET - Fetch current clinic settings
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
     // Get clinic settings (should have only one record)
     const settings = await prisma.clinicSettings.findFirst({
@@ -67,6 +71,9 @@ export async function GET() {
 
 // POST - Update clinic settings
 export async function POST(request: NextRequest) {
+  const auth = authenticateAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
     const body: ClinicSettingsData = await request.json();
     const {

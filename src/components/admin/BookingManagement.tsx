@@ -12,9 +12,13 @@ import {
   AlertCircle,
   RefreshCw,
   Eye,
+  Search,
+  FileText,
+  Check,
 } from "lucide-react";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import ErrorState from "../ui/ErrorState";
+import { adminFetch } from "../../../lib/adminFetch";
 
 interface Booking {
   id: string;
@@ -26,6 +30,7 @@ interface Booking {
   time: string;
   status: string;
   message: string;
+  notes?: string;
   sessionType?: string;
   sessionDuration?: number;
   emergencyContact?: string;
@@ -41,12 +46,18 @@ interface Booking {
   };
 }
 
+interface ConfirmActionState {
+  bookingId: string;
+  action: string;
+  bookingName: string;
+}
+
 interface BookingManagementProps {
   refreshInterval?: number;
 }
 
 const BookingManagement: React.FC<BookingManagementProps> = ({
-  refreshInterval = 30000, // 30 seconds default
+  refreshInterval = 30000,
 }) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
@@ -56,6 +67,14 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [totalBookings, setTotalBookings] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(
+    null
+  );
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState("");
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -74,7 +93,13 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
   const fetchBookings = async () => {
     try {
       setError("");
-      const response = await fetch("/api/admin/bookings");
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("search", searchQuery);
+      if (dateFrom) params.set("dateFrom", dateFrom);
+      if (dateTo) params.set("dateTo", dateTo);
+
+      const url = `/api/admin/bookings${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await adminFetch(url);
 
       if (!response.ok) {
         throw new Error("Failed to fetch bookings");
@@ -91,9 +116,13 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
     }
   };
 
-  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+  const updateBookingStatus = async (
+    bookingId: string,
+    newStatus: string,
+    notes?: string
+  ) => {
     try {
-      const response = await fetch("/api/admin/bookings", {
+      const response = await adminFetch("/api/admin/bookings", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -101,6 +130,7 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         body: JSON.stringify({
           bookingId,
           status: newStatus,
+          ...(notes !== undefined && { notes }),
         }),
       });
 
@@ -110,34 +140,80 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
 
       await response.json();
 
-      // Update the booking in the local state
       setBookings((prev) =>
         prev.map((booking) =>
-          booking.id === bookingId ? { ...booking, status: newStatus } : booking
+          booking.id === bookingId
+            ? { ...booking, status: newStatus, ...(notes !== undefined && { notes }) }
+            : booking
         )
       );
 
-      // Close details modal if open
       if (selectedBooking?.id === bookingId) {
-        setSelectedBooking({ ...selectedBooking, status: newStatus });
+        setSelectedBooking({
+          ...selectedBooking,
+          status: newStatus,
+          ...(notes !== undefined && { notes }),
+        });
       }
+
+      setConfirmAction(null);
     } catch (err) {
       console.error("Error updating booking:", err);
       setError("Failed to update booking status.");
     }
   };
 
+  const saveNotes = async (bookingId: string, notes: string) => {
+    try {
+      const response = await adminFetch("/api/admin/bookings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingId,
+          status: selectedBooking?.status,
+          notes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save notes");
+      }
+
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === bookingId ? { ...booking, notes } : booking
+        )
+      );
+
+      if (selectedBooking?.id === bookingId) {
+        setSelectedBooking({ ...selectedBooking, notes });
+      }
+
+      setEditingNotes(false);
+    } catch (err) {
+      console.error("Error saving notes:", err);
+      setError("Failed to save notes.");
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
 
-    // Set up auto-refresh
     const interval = setInterval(fetchBookings, refreshInterval);
-
     return () => clearInterval(interval);
   }, [refreshInterval]);
 
+  // Re-fetch when search/date filters change
   useEffect(() => {
-    // Filter bookings based on selected status
+    const debounce = setTimeout(() => {
+      fetchBookings();
+    }, 300);
+    return () => clearTimeout(debounce);
+  }, [searchQuery, dateFrom, dateTo]);
+
+  useEffect(() => {
     if (selectedStatus === "all") {
       setFilteredBookings(bookings);
     } else {
@@ -165,6 +241,67 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
 
   const getStatusCount = (status: string) => {
     return bookings.filter((booking) => booking.status === status).length;
+  };
+
+  const requestStatusChange = (
+    bookingId: string,
+    action: string,
+    bookingName: string
+  ) => {
+    setConfirmAction({ bookingId, action, bookingName });
+  };
+
+  // Confirmation Dialog
+  const ConfirmDialog = () => {
+    if (!confirmAction) return null;
+
+    const actionLabels: Record<string, { label: string; color: string }> = {
+      confirmed: { label: "Confirm", color: "bg-green-500 hover:bg-green-600" },
+      cancelled: { label: "Cancel", color: "bg-red-500 hover:bg-red-600" },
+      completed: { label: "Mark as Completed", color: "bg-blue-500 hover:bg-blue-600" },
+    };
+
+    const { label, color } = actionLabels[confirmAction.action] || {
+      label: confirmAction.action,
+      color: "bg-gray-500",
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-lg shadow-xl max-w-sm w-full p-4"
+        >
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            Confirm Action
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Are you sure you want to <strong>{label.toLowerCase()}</strong> the
+            booking for <strong>{confirmAction.bookingName}</strong>?
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setConfirmAction(null)}
+              className="flex-1 px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Go Back
+            </button>
+            <button
+              onClick={() =>
+                updateBookingStatus(
+                  confirmAction.bookingId,
+                  confirmAction.action
+                )
+              }
+              className={`flex-1 px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${color}`}
+            >
+              {label}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
   };
 
   const BookingCard = ({ booking }: { booking: Booking }) => (
@@ -198,6 +335,8 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         <button
           onClick={() => {
             setSelectedBooking(booking);
+            setNotesValue(booking.notes || "");
+            setEditingNotes(false);
             setShowDetails(true);
           }}
           className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
@@ -230,16 +369,43 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         <p className="text-xs text-gray-600">{booking.service}</p>
       </div>
 
+      {/* Action Buttons */}
       {booking.status === "pending" && (
         <div className="mt-3 flex gap-2">
           <button
-            onClick={() => updateBookingStatus(booking.id, "confirmed")}
+            onClick={() =>
+              requestStatusChange(booking.id, "confirmed", booking.name)
+            }
             className="flex-1 px-3 py-2 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
           >
             Confirm
           </button>
           <button
-            onClick={() => updateBookingStatus(booking.id, "cancelled")}
+            onClick={() =>
+              requestStatusChange(booking.id, "cancelled", booking.name)
+            }
+            className="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {booking.status === "confirmed" && (
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() =>
+              requestStatusChange(booking.id, "completed", booking.name)
+            }
+            className="flex-1 px-3 py-2 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-1"
+          >
+            <Check className="w-3.5 h-3.5" />
+            Mark as Completed
+          </button>
+          <button
+            onClick={() =>
+              requestStatusChange(booking.id, "cancelled", booking.name)
+            }
             className="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
           >
             Cancel
@@ -280,25 +446,19 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Name
-                    </label>
+                    <label className="text-xs text-gray-500">Name</label>
                     <p className="text-sm text-gray-900">
                       {selectedBooking.name}
                     </p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Email
-                    </label>
+                    <label className="text-xs text-gray-500">Email</label>
                     <p className="text-sm text-gray-900 truncate">
                       {selectedBooking.email}
                     </p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Phone
-                    </label>
+                    <label className="text-xs text-gray-500">Phone</label>
                     <p className="text-sm text-gray-900">
                       {selectedBooking.phone}
                     </p>
@@ -313,33 +473,25 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Service
-                    </label>
+                    <label className="text-xs text-gray-500">Service</label>
                     <p className="text-sm text-gray-900">
                       {selectedBooking.service}
                     </p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Date
-                    </label>
+                    <label className="text-xs text-gray-500">Date</label>
                     <p className="text-sm text-gray-900">
                       {formatDate(selectedBooking.date)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Time
-                    </label>
+                    <label className="text-xs text-gray-500">Time</label>
                     <p className="text-sm text-gray-900">
                       {formatTime(selectedBooking.time)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">
-                      Status
-                    </label>
+                    <label className="text-xs text-gray-500">Status</label>
                     <span
                       className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded-full border ${
                         statusColors[
@@ -368,9 +520,7 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                   )}
                   {selectedBooking.sessionDuration && (
                     <div>
-                      <label className="text-xs text-gray-500">
-                        Duration
-                      </label>
+                      <label className="text-xs text-gray-500">Duration</label>
                       <p className="text-sm text-gray-900">
                         {selectedBooking.sessionDuration} minutes
                       </p>
@@ -380,14 +530,16 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               </div>
 
               {/* Message */}
-              <div>
-                <h3 className="text-xs font-medium text-gray-900 mb-2">
-                  Message
-                </h3>
-                <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded-lg">
-                  {selectedBooking.message}
-                </p>
-              </div>
+              {selectedBooking.message && (
+                <div>
+                  <h3 className="text-xs font-medium text-gray-900 mb-2">
+                    Message
+                  </h3>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded-lg">
+                    {selectedBooking.message}
+                  </p>
+                </div>
+              )}
 
               {/* Medical Information */}
               {(selectedBooking.medicalHistory ||
@@ -432,6 +584,62 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                 </div>
               )}
 
+              {/* Admin Notes */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-medium text-gray-900 flex items-center gap-1">
+                    <FileText className="w-3.5 h-3.5" />
+                    Admin Notes
+                  </h3>
+                  {!editingNotes && (
+                    <button
+                      onClick={() => {
+                        setNotesValue(selectedBooking.notes || "");
+                        setEditingNotes(true);
+                      }}
+                      className="text-xs text-[#FF3133] hover:underline"
+                    >
+                      {selectedBooking.notes ? "Edit" : "Add Notes"}
+                    </button>
+                  )}
+                </div>
+                {editingNotes ? (
+                  <div>
+                    <textarea
+                      value={notesValue}
+                      onChange={(e) => setNotesValue(e.target.value)}
+                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                      rows={3}
+                      placeholder="Add admin notes about this booking..."
+                    />
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => setEditingNotes(false)}
+                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() =>
+                          saveNotes(selectedBooking.id, notesValue)
+                        }
+                        className="px-3 py-1.5 text-xs font-medium bg-[#FF3133] text-white rounded-lg hover:bg-[#e62a2c]"
+                      >
+                        Save Notes
+                      </button>
+                    </div>
+                  </div>
+                ) : selectedBooking.notes ? (
+                  <p className="text-sm text-gray-700 bg-amber-50 border border-amber-200 p-2 rounded-lg">
+                    {selectedBooking.notes}
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">
+                    No notes added yet.
+                  </p>
+                )}
+              </div>
+
               {/* Status Update Actions */}
               {selectedBooking.status === "pending" && (
                 <div>
@@ -441,7 +649,11 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
-                        updateBookingStatus(selectedBooking.id, "confirmed")
+                        requestStatusChange(
+                          selectedBooking.id,
+                          "confirmed",
+                          selectedBooking.name
+                        )
                       }
                       className="px-4 py-2 text-sm font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -449,7 +661,46 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                     </button>
                     <button
                       onClick={() =>
-                        updateBookingStatus(selectedBooking.id, "cancelled")
+                        requestStatusChange(
+                          selectedBooking.id,
+                          "cancelled",
+                          selectedBooking.name
+                        )
+                      }
+                      className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedBooking.status === "confirmed" && (
+                <div>
+                  <h3 className="text-xs font-medium text-gray-900 mb-2">
+                    Actions
+                  </h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        requestStatusChange(
+                          selectedBooking.id,
+                          "completed",
+                          selectedBooking.name
+                        )
+                      }
+                      className="px-4 py-2 text-sm font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      Mark as Completed
+                    </button>
+                    <button
+                      onClick={() =>
+                        requestStatusChange(
+                          selectedBooking.id,
+                          "cancelled",
+                          selectedBooking.name
+                        )
                       }
                       className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
@@ -477,7 +728,7 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
     );
   }
 
-  if (error) {
+  if (error && bookings.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
         <ErrorState
@@ -514,6 +765,38 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         </button>
       </div>
 
+      {/* Search and Date Filters */}
+      <div className="bg-white rounded-lg shadow-sm p-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, email, or phone..."
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+              placeholder="From"
+            />
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+              placeholder="To"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Status Filter and Stats */}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         <button
@@ -524,9 +807,7 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
           }`}
         >
-          <div className="text-lg font-semibold">
-            {totalBookings}
-          </div>
+          <div className="text-lg font-semibold">{totalBookings}</div>
           <div className="text-xs font-medium">All</div>
         </button>
 
@@ -538,10 +819,16 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className={`text-lg font-semibold ${selectedStatus === "pending" ? "text-white" : "text-yellow-600"}`}>
+          <div
+            className={`text-lg font-semibold ${selectedStatus === "pending" ? "text-white" : "text-yellow-600"}`}
+          >
             {getStatusCount("pending")}
           </div>
-          <div className={`text-xs font-medium ${selectedStatus === "pending" ? "text-white" : "text-gray-600"}`}>Pending</div>
+          <div
+            className={`text-xs font-medium ${selectedStatus === "pending" ? "text-white" : "text-gray-600"}`}
+          >
+            Pending
+          </div>
         </button>
 
         <button
@@ -552,10 +839,16 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className={`text-lg font-semibold ${selectedStatus === "confirmed" ? "text-white" : "text-green-600"}`}>
+          <div
+            className={`text-lg font-semibold ${selectedStatus === "confirmed" ? "text-white" : "text-green-600"}`}
+          >
             {getStatusCount("confirmed")}
           </div>
-          <div className={`text-xs font-medium ${selectedStatus === "confirmed" ? "text-white" : "text-gray-600"}`}>Confirmed</div>
+          <div
+            className={`text-xs font-medium ${selectedStatus === "confirmed" ? "text-white" : "text-gray-600"}`}
+          >
+            Confirmed
+          </div>
         </button>
 
         <button
@@ -566,10 +859,16 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className={`text-lg font-semibold ${selectedStatus === "cancelled" ? "text-white" : "text-red-600"}`}>
+          <div
+            className={`text-lg font-semibold ${selectedStatus === "cancelled" ? "text-white" : "text-red-600"}`}
+          >
             {getStatusCount("cancelled")}
           </div>
-          <div className={`text-xs font-medium ${selectedStatus === "cancelled" ? "text-white" : "text-gray-600"}`}>Cancelled</div>
+          <div
+            className={`text-xs font-medium ${selectedStatus === "cancelled" ? "text-white" : "text-gray-600"}`}
+          >
+            Cancelled
+          </div>
         </button>
 
         <button
@@ -580,10 +879,16 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className={`text-lg font-semibold ${selectedStatus === "completed" ? "text-white" : "text-blue-600"}`}>
+          <div
+            className={`text-lg font-semibold ${selectedStatus === "completed" ? "text-white" : "text-blue-600"}`}
+          >
             {getStatusCount("completed")}
           </div>
-          <div className={`text-xs font-medium ${selectedStatus === "completed" ? "text-white" : "text-gray-600"}`}>Completed</div>
+          <div
+            className={`text-xs font-medium ${selectedStatus === "completed" ? "text-white" : "text-gray-600"}`}
+          >
+            Completed
+          </div>
         </button>
       </div>
 
@@ -604,9 +909,7 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-8 text-gray-500">
             <Calendar className="w-8 h-8 mb-3" />
-            <h3 className="text-sm font-medium mb-1">
-              No bookings found
-            </h3>
+            <h3 className="text-sm font-medium mb-1">No bookings found</h3>
             <p className="text-center text-xs">
               {selectedStatus === "all"
                 ? "No bookings have been made yet."
@@ -616,8 +919,9 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         )}
       </div>
 
-      {/* Booking Details Modal */}
+      {/* Modals */}
       {showDetails && <BookingDetailsModal />}
+      <ConfirmDialog />
     </div>
   );
 };

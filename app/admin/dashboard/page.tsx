@@ -20,6 +20,7 @@ import BookingManagement from "../../../src/components/admin/BookingManagement";
 import CalendarSchedule from "../../../src/components/admin/CalendarSchedule";
 import { useAdminAuth } from "../../../src/contexts/AdminAuthContext";
 import AdminLogin from "../../../src/components/admin/AdminLogin";
+import { adminFetch } from "../../../lib/adminFetch";
 
 interface BlockedPeriod {
   start: string;
@@ -78,7 +79,7 @@ const AdminDashboard = () => {
 
     const fetchSettings = async () => {
       try {
-        const response = await fetch("/api/admin/settings");
+        const response = await adminFetch("/api/admin/settings");
         if (response.ok) {
           const data = await response.json();
           if (data.settings) {
@@ -113,7 +114,7 @@ const AdminDashboard = () => {
     setSuccess("");
 
     try {
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
