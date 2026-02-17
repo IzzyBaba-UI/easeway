@@ -13,10 +13,13 @@ import {
   AlertCircle,
   CheckCircle,
   BookOpen,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import BookingManagement from "../../../src/components/admin/BookingManagement";
 import CalendarSchedule from "../../../src/components/admin/CalendarSchedule";
+import { useAdminAuth } from "../../../src/contexts/AdminAuthContext";
+import AdminLogin from "../../../src/components/admin/AdminLogin";
 
 interface BlockedPeriod {
   start: string;
@@ -47,6 +50,7 @@ const dayNames = [
 ];
 
 const AdminDashboard = () => {
+  const { isAuthenticated, isLoading, logout } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<
     "settings" | "bookings" | "schedule"
   >("schedule");
@@ -70,6 +74,8 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const fetchSettings = async () => {
       try {
         const response = await fetch("/api/admin/settings");
@@ -87,7 +93,19 @@ const AdminDashboard = () => {
     };
 
     fetchSettings();
-  }, []);
+  }, [isAuthenticated]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF3133]"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AdminLogin />;
+  }
 
   const handleSaveSettings = async () => {
     setSaving(true);
@@ -148,25 +166,35 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EDF2F6] to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-3 text-[#0E2127] hover:text-[#FF3133] transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-[#FF3133] transition-colors text-sm"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back to Home</span>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to Home</span>
             </Link>
-            <div className="text-right">
-              <h1 className="text-2xl font-bold text-[#0E2127]">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600 text-body font-uber">
-                Manage clinic settings and bookings
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <h1 className="text-lg font-semibold text-gray-900">
+                  Admin Dashboard
+                </h1>
+                <p className="text-xs text-gray-500 hidden sm:block">
+                  Manage clinic settings and bookings
+                </p>
+              </div>
+              <button
+                onClick={logout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-[#FF3133] hover:bg-red-50 rounded-md transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
@@ -174,45 +202,47 @@ const AdminDashboard = () => {
 
       {/* Tab Navigation */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex space-x-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex space-x-4 sm:space-x-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab("schedule")}
-              className={`py-4 px-1 border-b-2 font-medium text-base transition-colors ${
+              className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
                 activeTab === "schedule"
                   ? "border-[#FF3133] text-[#FF3133]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                Schedule & Calendar
+                <span className="hidden sm:inline">Schedule & Calendar</span>
+                <span className="sm:hidden">Schedule</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab("bookings")}
-              className={`py-4 px-1 border-b-2 font-medium text-base transition-colors ${
+              className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
                 activeTab === "bookings"
                   ? "border-[#FF3133] text-[#FF3133]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4" />
-                Booking Management
+                <span className="hidden sm:inline">Booking Management</span>
+                <span className="sm:hidden">Bookings</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              className={`py-4 px-1 border-b-2 font-medium text-base transition-colors ${
+              className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
                 activeTab === "settings"
                   ? "border-[#FF3133] text-[#FF3133]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Settings className="w-4 h-4" />
-                Clinic Settings
+                Settings
               </div>
             </button>
           </div>
@@ -220,50 +250,50 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {activeTab === "schedule" && <CalendarSchedule />}
         {activeTab === "bookings" && <BookingManagement />}
         {activeTab === "settings" && (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             {/* Status Messages */}
             {success && (
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3"
+                className="bg-green-50 border border-green-200 rounded-lg p-2.5 mb-4 flex items-center gap-2 text-sm"
               >
-                <CheckCircle className="w-5 h-5 text-green-600" />
+                <CheckCircle className="w-4 h-4 text-green-600" />
                 <span className="text-green-800">{success}</span>
               </motion.div>
             )}
 
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center gap-3"
+                className="bg-red-50 border border-red-200 rounded-lg p-2.5 mb-4 flex items-center gap-2 text-sm"
               >
-                <AlertCircle className="w-5 h-5 text-red-600" />
+                <AlertCircle className="w-4 h-4 text-red-600" />
                 <span className="text-red-800">{error}</span>
               </motion.div>
             )}
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-6"
+              transition={{ duration: 0.4 }}
+              className="space-y-4"
             >
               {/* Basic Hours Settings */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-body-lg font-semibold text-[#0E2127] mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
                   Operating Hours
                 </h3>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#0E2127] font-medium mb-2">
+                    <label className="block text-xs text-gray-700 font-medium mb-1">
                       Opening Time
                     </label>
                     <input
@@ -275,12 +305,12 @@ const AdminDashboard = () => {
                           openingTime: e.target.value,
                         }))
                       }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#0E2127] font-medium mb-2">
+                    <label className="block text-xs text-gray-700 font-medium mb-1">
                       Closing Time
                     </label>
                     <input
@@ -292,14 +322,14 @@ const AdminDashboard = () => {
                           closingTime: e.target.value,
                         }))
                       }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                     />
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label className="block text-[#0E2127] font-medium mb-2">
-                    Time Slot Duration (minutes)
+                <div className="mt-3">
+                  <label className="block text-xs text-gray-700 font-medium mb-1">
+                    Time Slot Duration
                   </label>
                   <select
                     value={settings.timeSlotDuration}
@@ -309,7 +339,7 @@ const AdminDashboard = () => {
                         timeSlotDuration: parseInt(e.target.value),
                       }))
                     }
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                    className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                   >
                     <option value={15}>15 minutes</option>
                     <option value={30}>30 minutes</option>
@@ -320,15 +350,15 @@ const AdminDashboard = () => {
               </div>
 
               {/* Break Period */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-body-lg font-semibold text-[#0E2127] mb-4">
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">
                   Break Period (Optional)
                 </h3>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#0E2127] font-medium mb-2">
-                      Break Start Time
+                    <label className="block text-xs text-gray-700 font-medium mb-1">
+                      Break Start
                     </label>
                     <input
                       type="time"
@@ -339,13 +369,13 @@ const AdminDashboard = () => {
                           breakStart: e.target.value,
                         }))
                       }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#0E2127] font-medium mb-2">
-                      Break End Time
+                    <label className="block text-xs text-gray-700 font-medium mb-1">
+                      Break End
                     </label>
                     <input
                       type="time"
@@ -356,28 +386,28 @@ const AdminDashboard = () => {
                           breakEnd: e.target.value,
                         }))
                       }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Working Days */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-body-lg font-semibold text-[#0E2127] mb-4 flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
                   Working Days
                 </h3>
 
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                   {dayNames.map((day, index) => (
                     <button
                       key={index}
                       onClick={() => handleWorkingDayToggle(index)}
-                      className={`p-3 rounded-lg text-base font-medium transition-all ${
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         settings.workingDays.includes(index)
                           ? "bg-[#FF3133] text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       {day.slice(0, 3)}
@@ -387,20 +417,20 @@ const AdminDashboard = () => {
               </div>
 
               {/* Blocked Periods */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-body-lg font-semibold text-[#0E2127] mb-4">
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">
                   Blocked Time Periods
                 </h3>
 
                 {/* Add New Blocked Period */}
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <h4 className="font-medium text-[#0E2127] mb-3">
+                <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                  <h4 className="text-xs font-medium text-gray-700 mb-2">
                     Add Blocked Period
                   </h4>
-                  <div className="grid md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div>
-                      <label className="block text-base font-medium text-gray-700 mb-1">
-                        Start Time
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Start
                       </label>
                       <input
                         type="time"
@@ -411,12 +441,12 @@ const AdminDashboard = () => {
                             start: e.target.value,
                           }))
                         }
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-base font-medium text-gray-700 mb-1">
-                        End Time
+                      <label className="block text-xs text-gray-600 mb-1">
+                        End
                       </label>
                       <input
                         type="time"
@@ -427,11 +457,11 @@ const AdminDashboard = () => {
                             end: e.target.value,
                           }))
                         }
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-base font-medium text-gray-700 mb-1">
+                      <label className="block text-xs text-gray-600 mb-1">
                         Reason
                       </label>
                       <input
@@ -443,14 +473,14 @@ const AdminDashboard = () => {
                             reason: e.target.value,
                           }))
                         }
-                        placeholder="e.g., Lunch break"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                        placeholder="e.g., Lunch"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
                       />
                     </div>
                     <div className="flex items-end">
                       <button
                         onClick={addBlockedPeriod}
-                        className="w-full bg-[#FF3133] text-white p-2 rounded-lg hover:bg-[#e62a2c] transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-[#FF3133] text-white px-3 py-2 text-sm font-medium rounded-lg hover:bg-[#e62a2c] transition-colors flex items-center justify-center gap-1.5"
                       >
                         <Plus className="w-4 h-4" />
                         Add
@@ -462,19 +492,19 @@ const AdminDashboard = () => {
                 {/* Current Blocked Periods */}
                 {settings.blockedPeriods.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="font-medium text-[#0E2127] mb-2">
+                    <h4 className="text-xs font-medium text-gray-700 mb-1">
                       Current Blocked Periods
                     </h4>
                     {settings.blockedPeriods.map((period, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3"
+                        className="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-2 text-sm"
                       >
                         <div>
                           <span className="font-medium text-red-800">
                             {period.start} - {period.end}
                           </span>
-                          <span className="text-red-600 ml-2">
+                          <span className="text-red-600 ml-2 text-xs">
                             ({period.reason})
                           </span>
                         </div>
@@ -482,7 +512,7 @@ const AdminDashboard = () => {
                           onClick={() => removeBlockedPeriod(index)}
                           className="text-red-600 hover:text-red-800 transition-colors"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ))}
@@ -491,12 +521,12 @@ const AdminDashboard = () => {
               </div>
 
               {/* Clinic Status */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-body-lg font-semibold text-[#0E2127] mb-4">
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">
                   Clinic Status
                 </h3>
 
-                <label className="flex items-center gap-3">
+                <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={settings.isActive}
@@ -506,13 +536,13 @@ const AdminDashboard = () => {
                         isActive: e.target.checked,
                       }))
                     }
-                    className="w-5 h-5 text-[#FF3133] rounded focus:ring-[#FF3133] focus:ring-2"
+                    className="w-4 h-4 text-[#FF3133] rounded focus:ring-[#FF3133] focus:ring-2"
                   />
-                  <span className="text-[#0E2127] font-medium">
+                  <span className="text-sm text-gray-900">
                     Clinic is open for bookings
                   </span>
                 </label>
-                <p className="text-body text-gray-600 mt-2 font-uber">
+                <p className="text-xs text-gray-500 mt-1.5 ml-6">
                   When disabled, no new appointments can be booked
                 </p>
               </div>
@@ -522,9 +552,9 @@ const AdminDashboard = () => {
                 <button
                   onClick={handleSaveSettings}
                   disabled={saving}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     saving
-                      ? "bg-gray-400 cursor-not-allowed"
+                      ? "bg-gray-400 cursor-not-allowed text-white"
                       : "bg-[#FF3133] hover:bg-[#e62a2c] text-white"
                   }`}
                 >

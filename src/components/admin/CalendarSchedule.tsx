@@ -283,48 +283,46 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
       <div
         onClick={() => !isPast && handleSlotClick(date, time)}
         className={`
- p-2 border rounded text-base cursor-pointer transition-all min-h-[60px] relative
+ p-1.5 border rounded text-xs cursor-pointer transition-all min-h-[50px] relative
  ${getSlotColor(date, time)}
  ${isPast ? "opacity-50 cursor-not-allowed" : ""}
  ${isToday ? "ring-2 ring-blue-300" : ""}
  `}
       >
-        <div className="font-medium">{time}</div>
+        <div className="font-medium text-xs">{time}</div>
         {booking && (
-          <div className="mt-1">
-            <div className="font-semibold truncate">{booking.name}</div>
-            <div className="text-base opacity-75">{booking.service}</div>
-            <div className="text-base">#{booking.confirmationNumber}</div>
+          <div className="mt-0.5">
+            <div className="font-medium truncate text-xs">{booking.name}</div>
+            <div className="text-xs opacity-75 truncate">{booking.service}</div>
           </div>
         )}
         {blocked && (
-          <div className="mt-1">
-            <div className="flex items-center gap-1">
-              <Ban className="w-3 h-3" />
-              <span className="font-medium">Blocked</span>
+          <div className="mt-0.5">
+            <div className="flex items-center gap-0.5">
+              <Ban className="w-2.5 h-2.5" />
+              <span className="font-medium text-xs">Blocked</span>
             </div>
-            <div className="text-base opacity-75">{blocked.reason}</div>
+            <div className="text-xs opacity-75 truncate">{blocked.reason}</div>
           </div>
         )}
         {!booking && !blocked && !isPast && (
-          <div className="text-gray-400 text-base">Click to block</div>
+          <div className="text-gray-400 text-xs">Click to block</div>
         )}
       </div>
     );
   };
 
   const WeekView = () => (
-    <div className="grid grid-cols-8 gap-2">
+    <div className="grid grid-cols-8 gap-1">
       {/* Time column header */}
-      <div className="font-medium text-gray-700 p-2">Time</div>
+      <div className="font-medium text-gray-700 p-1 text-xs">Time</div>
 
       {/* Day headers */}
       {weekDays.map((day) => (
-        <div key={day.toISOString()} className="text-center p-2">
-          <div className="font-medium text-gray-900">
+        <div key={day.toISOString()} className="text-center p-1">
+          <div className="font-medium text-gray-900 text-xs">
             {formatDateDisplay(day)}
           </div>
-          <div className="text-base text-gray-500">{formatDate(day)}</div>
         </div>
       ))}
 
@@ -332,7 +330,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
       {timeSlots.map((time) => (
         <React.Fragment key={time}>
           {/* Time label */}
-          <div className="p-2 text-body-sm font-axiforma text-gray-700 border-r">
+          <div className="p-1 text-xs text-gray-700 border-r">
             {time}
           </div>
 
@@ -350,9 +348,9 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
   );
 
   const DayView = () => (
-    <div className="max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900">
+    <div className="max-w-sm mx-auto">
+      <div className="text-center mb-4">
+        <h3 className="text-sm font-medium text-gray-900">
           {currentDate.toLocaleDateString("en-GB", {
             weekday: "long",
             year: "numeric",
@@ -362,7 +360,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
         </h3>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {timeSlots.map((time) => (
           <TimeSlot key={time} date={formatDate(currentDate)} time={time} />
         ))}
@@ -378,44 +376,44 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-lg shadow-xl max-w-md w-full"
+          className="bg-white rounded-lg shadow-xl max-w-sm w-full"
         >
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-900">
                 Block Time Slot
               </h3>
               <button
                 onClick={() => setShowBlockModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="mb-4">
-              <p className="text-gray-600 text-body font-uber">
+            <div className="mb-3">
+              <p className="text-xs text-gray-600">
                 Block {selectedSlot.time} on {selectedSlot.date}?
               </p>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-body-sm font-axiforma text-gray-700 mb-2">
+            <div className="mb-4">
+              <label className="block text-xs text-gray-700 mb-1">
                 Reason for blocking
               </label>
               <textarea
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={3}
-                placeholder="e.g., Staff meeting, Equipment maintenance, Holiday"
+                className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+                placeholder="e.g., Staff meeting, Holiday"
               />
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowBlockModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -428,9 +426,9 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
                   )
                 }
                 disabled={!blockReason.trim()}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                Block Slot
+                Block
               </button>
             </div>
           </div>
@@ -471,35 +469,35 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-h3-mobile md:text-h2-desktop font-axiforma text-gray-900">
+          <h2 className="text-sm font-medium text-gray-900">
             Schedule Management
           </h2>
-          <p className="text-gray-600 text-body font-uber">
-            View bookings and manage time slot availability
+          <p className="text-xs text-gray-500">
+            View bookings and manage availability
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center border rounded-lg">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("week")}
-              className={`px-4 py-2 text-body-sm font-axiforma transition-colors ${
+              className={`px-4 py-2 text-xs font-medium transition-colors ${
                 viewMode === "week"
                   ? "bg-[#FF3133] text-white"
-                  : "text-gray-700 hover:bg-gray-100"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
               Week
             </button>
             <button
               onClick={() => setViewMode("day")}
-              className={`px-4 py-2 text-body-sm font-axiforma transition-colors ${
+              className={`px-4 py-2 text-xs font-medium transition-colors ${
                 viewMode === "day"
                   ? "bg-[#FF3133] text-white"
-                  : "text-gray-700 hover:bg-gray-100"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
               Day
@@ -510,7 +508,7 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
               fetchBookings();
               fetchBlockedSlots();
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-[#FF3133] text-white rounded-lg hover:bg-[#e62a2c] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-medium bg-[#FF3133] text-white rounded-lg hover:bg-[#e62a2c] transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh
@@ -519,26 +517,26 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
         <button
           onClick={() =>
             viewMode === "week" ? navigateWeek("prev") : navigateDay("prev")
           }
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous {viewMode === "week" ? "Week" : "Day"}
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-center">
-          <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900">
+          <h3 className="text-sm font-medium text-gray-900">
             {viewMode === "week"
               ? `Week of ${formatDateDisplay(weekDays[0])}`
               : formatDateDisplay(currentDate)}
           </h3>
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="text-base text-[#FF3133] hover:underline"
+            className="text-xs text-[#FF3133] hover:underline"
           >
             Go to Today
           </button>
@@ -548,58 +546,56 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
           onClick={() =>
             viewMode === "week" ? navigateWeek("next") : navigateDay("next")
           }
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          Next {viewMode === "week" ? "Week" : "Day"}
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-          <span className="text-base text-gray-700">Confirmed</span>
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 bg-white p-2.5 rounded-lg shadow-sm">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+          <span className="text-xs text-gray-700">Confirmed</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded"></div>
-          <span className="text-base text-gray-700">Pending</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
+          <span className="text-xs text-gray-700">Pending</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded"></div>
-          <span className="text-base text-gray-700">Blocked</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-gray-200 border border-gray-400 rounded"></div>
+          <span className="text-xs text-gray-700">Blocked</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
-          <span className="text-base text-gray-700">Available</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 bg-white border border-gray-200 rounded"></div>
+          <span className="text-xs text-gray-700">Available</span>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-red-700 text-body font-uber">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 flex items-center gap-2 text-sm">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <p className="text-red-700 text-xs">{error}</p>
         </div>
       )}
 
       {/* Calendar View */}
-      <div className="bg-white rounded-lg shadow-sm p-6 overflow-x-auto">
+      <div className="bg-white rounded-lg shadow-sm p-3 overflow-x-auto">
         {viewMode === "week" ? <WeekView /> : <DayView />}
       </div>
 
       {/* Instructions */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <CalendarIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="flex items-start gap-2">
+          <CalendarIcon className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 mb-1">How to use:</h4>
-            <ul className="text-base text-blue-700 space-y-1">
-              <li>• Click on an empty time slot to block it</li>
-              <li>• Click on a blocked slot to unblock it</li>
-              <li>• Booked slots show patient information</li>
-              <li>• Blocked slots are grayed out for users</li>
-              <li>• Past time slots cannot be modified</li>
+            <h4 className="text-xs font-medium text-blue-900 mb-1">How to use:</h4>
+            <ul className="text-xs text-blue-700 space-y-0.5">
+              <li>• Click on an empty slot to block it</li>
+              <li>• Click on a blocked slot to unblock</li>
+              <li>• Past slots cannot be modified</li>
             </ul>
           </div>
         </div>

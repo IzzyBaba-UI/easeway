@@ -169,18 +169,18 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
 
   const BookingCard = ({ booking }: { booking: Booking }) => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="font-semibold text-lg text-gray-900">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-sm text-gray-900">
               {booking.name}
             </h3>
             <span
-              className={`px-2 py-1 text-base rounded-full border ${
+              className={`px-1.5 py-0.5 text-xs rounded-full border ${
                 statusColors[booking.status as keyof typeof statusColors]
               }`}
             >
@@ -191,7 +191,7 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               </span>
             </span>
           </div>
-          <p className="text-body text-gray-600 font-uber">
+          <p className="text-xs text-gray-500">
             #{booking.confirmationNumber}
           </p>
         </div>
@@ -200,47 +200,47 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
             setSelectedBooking(booking);
             setShowDetails(true);
           }}
-          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
         >
           <Eye className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 text-base">
-        <div className="flex items-center gap-2 text-gray-600">
-          <Calendar className="w-4 h-4" />
-          <span>{formatDate(booking.date)}</span>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-gray-600">
+          <Calendar className="w-3.5 h-3.5" />
+          <span className="truncate">{formatDate(booking.date)}</span>
         </div>
-        <div className="flex items-center gap-2 text-gray-600">
-          <Clock className="w-4 h-4" />
+        <div className="flex items-center gap-1.5 text-gray-600">
+          <Clock className="w-3.5 h-3.5" />
           <span>{formatTime(booking.time)}</span>
         </div>
-        <div className="flex items-center gap-2 text-gray-600">
-          <Mail className="w-4 h-4" />
-          <span>{booking.email}</span>
+        <div className="flex items-center gap-1.5 text-gray-600">
+          <Mail className="w-3.5 h-3.5" />
+          <span className="truncate">{booking.email}</span>
         </div>
-        <div className="flex items-center gap-2 text-gray-600">
-          <Phone className="w-4 h-4" />
+        <div className="flex items-center gap-1.5 text-gray-600">
+          <Phone className="w-3.5 h-3.5" />
           <span>{booking.phone}</span>
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100">
-        <p className="text-body font-axiforma text-gray-700 mb-1">Service:</p>
-        <p className="text-body text-gray-600 font-uber">{booking.service}</p>
+      <div className="mt-3 pt-3 border-t border-gray-100">
+        <p className="text-xs text-gray-700 mb-0.5">Service:</p>
+        <p className="text-xs text-gray-600">{booking.service}</p>
       </div>
 
       {booking.status === "pending" && (
-        <div className="mt-4 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <button
             onClick={() => updateBookingStatus(booking.id, "confirmed")}
-            className="flex-1 px-3 py-2 bg-green-500 text-white text-base rounded-lg hover:bg-green-600 transition-colors"
+            className="flex-1 px-3 py-2 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
           >
             Confirm
           </button>
           <button
             onClick={() => updateBookingStatus(booking.id, "cancelled")}
-            className="flex-1 px-3 py-2 bg-red-500 text-white text-base rounded-lg hover:bg-red-600 transition-colors"
+            className="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
           >
             Cancel
           </button>
@@ -257,49 +257,49 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
         >
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-body-lg font-bold text-gray-900">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-gray-900">
                 Booking Details
               </h2>
               <button
                 onClick={() => setShowDetails(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <XCircle className="w-6 h-6" />
+                <XCircle className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Patient Information */}
               <div>
-                <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900 mb-3">
+                <h3 className="text-xs font-medium text-gray-900 mb-2">
                   Patient Information
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Name
                     </label>
-                    <p className="text-gray-900 text-body font-uber">
+                    <p className="text-sm text-gray-900">
                       {selectedBooking.name}
                     </p>
                   </div>
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Email
                     </label>
-                    <p className="text-gray-900 text-body font-uber">
+                    <p className="text-sm text-gray-900 truncate">
                       {selectedBooking.email}
                     </p>
                   </div>
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Phone
                     </label>
-                    <p className="text-gray-900 text-body font-uber">
+                    <p className="text-sm text-gray-900">
                       {selectedBooking.phone}
                     </p>
                   </div>
@@ -308,40 +308,40 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
 
               {/* Appointment Details */}
               <div>
-                <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900 mb-3">
+                <h3 className="text-xs font-medium text-gray-900 mb-2">
                   Appointment Details
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Service
                     </label>
-                    <p className="text-gray-900 text-body font-uber">
+                    <p className="text-sm text-gray-900">
                       {selectedBooking.service}
                     </p>
                   </div>
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Date
                     </label>
-                    <p className="text-gray-900 text-body font-uber">
+                    <p className="text-sm text-gray-900">
                       {formatDate(selectedBooking.date)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Time
                     </label>
-                    <p className="text-gray-900 text-body font-uber">
+                    <p className="text-sm text-gray-900">
                       {formatTime(selectedBooking.time)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-body-sm font-axiforma text-gray-700">
+                    <label className="text-xs text-gray-500">
                       Status
                     </label>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 text-base rounded-full border ${
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded-full border ${
                         statusColors[
                           selectedBooking.status as keyof typeof statusColors
                         ]
@@ -358,20 +358,20 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                   </div>
                   {selectedBooking.sessionType && (
                     <div>
-                      <label className="text-body-sm font-axiforma text-gray-700">
+                      <label className="text-xs text-gray-500">
                         Session Type
                       </label>
-                      <p className="text-gray-900 text-body font-uber">
+                      <p className="text-sm text-gray-900">
                         {selectedBooking.sessionType}
                       </p>
                     </div>
                   )}
                   {selectedBooking.sessionDuration && (
                     <div>
-                      <label className="text-body-sm font-axiforma text-gray-700">
+                      <label className="text-xs text-gray-500">
                         Duration
                       </label>
-                      <p className="text-gray-900 text-body font-uber">
+                      <p className="text-sm text-gray-900">
                         {selectedBooking.sessionDuration} minutes
                       </p>
                     </div>
@@ -381,10 +381,10 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
 
               {/* Message */}
               <div>
-                <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900 mb-3">
+                <h3 className="text-xs font-medium text-gray-900 mb-2">
                   Message
                 </h3>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-body font-uber">
+                <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded-lg">
                   {selectedBooking.message}
                 </p>
               </div>
@@ -394,36 +394,36 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                 selectedBooking.currentMedications ||
                 selectedBooking.previousPhysiotherapy) && (
                 <div>
-                  <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900 mb-3">
+                  <h3 className="text-xs font-medium text-gray-900 mb-2">
                     Medical Information
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {selectedBooking.medicalHistory && (
                       <div>
-                        <label className="text-body-sm font-axiforma text-gray-700">
+                        <label className="text-xs text-gray-500">
                           Medical History
                         </label>
-                        <p className="text-gray-700 bg-gray-50 p-2 rounded text-body font-uber">
+                        <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
                           {selectedBooking.medicalHistory}
                         </p>
                       </div>
                     )}
                     {selectedBooking.currentMedications && (
                       <div>
-                        <label className="text-body-sm font-axiforma text-gray-700">
+                        <label className="text-xs text-gray-500">
                           Current Medications
                         </label>
-                        <p className="text-gray-700 bg-gray-50 p-2 rounded text-body font-uber">
+                        <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
                           {selectedBooking.currentMedications}
                         </p>
                       </div>
                     )}
                     {selectedBooking.previousPhysiotherapy && (
                       <div>
-                        <label className="text-body-sm font-axiforma text-gray-700">
+                        <label className="text-xs text-gray-500">
                           Previous Physiotherapy
                         </label>
-                        <p className="text-gray-700 bg-gray-50 p-2 rounded text-body font-uber">
+                        <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
                           {selectedBooking.previousPhysiotherapy}
                         </p>
                       </div>
@@ -435,25 +435,25 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
               {/* Status Update Actions */}
               {selectedBooking.status === "pending" && (
                 <div>
-                  <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma text-gray-900 mb-3">
+                  <h3 className="text-xs font-medium text-gray-900 mb-2">
                     Actions
                   </h3>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       onClick={() =>
                         updateBookingStatus(selectedBooking.id, "confirmed")
                       }
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                      className="px-4 py-2 text-sm font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
-                      Confirm Booking
+                      Confirm
                     </button>
                     <button
                       onClick={() =>
                         updateBookingStatus(selectedBooking.id, "cancelled")
                       }
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
-                      Cancel Booking
+                      Cancel
                     </button>
                   </div>
                 </div>
@@ -494,20 +494,20 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-h3-mobile md:text-h2-desktop font-axiforma text-gray-900">
+          <h2 className="text-sm font-medium text-gray-900">
             Booking Management
           </h2>
-          <p className="text-gray-600 text-body font-uber">
-            Manage and track appointment bookings ({totalBookings} total)
+          <p className="text-xs text-gray-500">
+            Manage and track appointments ({totalBookings} total)
           </p>
         </div>
         <button
           onClick={fetchBookings}
-          className="flex items-center gap-2 px-4 py-2 bg-[#FF3133] text-white rounded-lg hover:bg-[#e62a2c] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#FF3133] text-white rounded-lg hover:bg-[#e62a2c] transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
           Refresh
@@ -515,99 +515,99 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
       </div>
 
       {/* Status Filter and Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         <button
           onClick={() => setSelectedStatus("all")}
-          className={`p-4 rounded-lg border text-center transition-colors ${
+          className={`px-3 py-2 sm:px-4 sm:py-3 rounded-lg border text-center transition-colors ${
             selectedStatus === "all"
               ? "border-[#FF3133] bg-[#FF3133] text-white"
               : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
           }`}
         >
-          <div className="text-h3-mobile md:text-h2-desktop font-axiforma">
+          <div className="text-lg font-semibold">
             {totalBookings}
           </div>
-          <div className="text-base">All Bookings</div>
+          <div className="text-xs font-medium">All</div>
         </button>
 
         <button
           onClick={() => setSelectedStatus("pending")}
-          className={`p-4 rounded-lg border text-center transition-colors ${
+          className={`px-3 py-2 sm:px-4 sm:py-3 rounded-lg border text-center transition-colors ${
             selectedStatus === "pending"
               ? "border-yellow-500 bg-yellow-500 text-white"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className="text-h3-mobile md:text-h2-desktop font-axiforma text-yellow-600">
+          <div className={`text-lg font-semibold ${selectedStatus === "pending" ? "text-white" : "text-yellow-600"}`}>
             {getStatusCount("pending")}
           </div>
-          <div className="text-base">Pending</div>
+          <div className={`text-xs font-medium ${selectedStatus === "pending" ? "text-white" : "text-gray-600"}`}>Pending</div>
         </button>
 
         <button
           onClick={() => setSelectedStatus("confirmed")}
-          className={`p-4 rounded-lg border text-center transition-colors ${
+          className={`px-3 py-2 sm:px-4 sm:py-3 rounded-lg border text-center transition-colors ${
             selectedStatus === "confirmed"
               ? "border-green-500 bg-green-500 text-white"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className="text-h3-mobile md:text-h2-desktop font-axiforma text-green-600">
+          <div className={`text-lg font-semibold ${selectedStatus === "confirmed" ? "text-white" : "text-green-600"}`}>
             {getStatusCount("confirmed")}
           </div>
-          <div className="text-base">Confirmed</div>
+          <div className={`text-xs font-medium ${selectedStatus === "confirmed" ? "text-white" : "text-gray-600"}`}>Confirmed</div>
         </button>
 
         <button
           onClick={() => setSelectedStatus("cancelled")}
-          className={`p-4 rounded-lg border text-center transition-colors ${
+          className={`px-3 py-2 sm:px-4 sm:py-3 rounded-lg border text-center transition-colors ${
             selectedStatus === "cancelled"
               ? "border-red-500 bg-red-500 text-white"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className="text-h3-mobile md:text-h2-desktop font-axiforma text-red-600">
+          <div className={`text-lg font-semibold ${selectedStatus === "cancelled" ? "text-white" : "text-red-600"}`}>
             {getStatusCount("cancelled")}
           </div>
-          <div className="text-base">Cancelled</div>
+          <div className={`text-xs font-medium ${selectedStatus === "cancelled" ? "text-white" : "text-gray-600"}`}>Cancelled</div>
         </button>
 
         <button
           onClick={() => setSelectedStatus("completed")}
-          className={`p-4 rounded-lg border text-center transition-colors ${
+          className={`px-3 py-2 sm:px-4 sm:py-3 rounded-lg border text-center transition-colors ${
             selectedStatus === "completed"
               ? "border-blue-500 bg-blue-500 text-white"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              : "border-gray-200 bg-white hover:bg-gray-50"
           }`}
         >
-          <div className="text-h3-mobile md:text-h2-desktop font-axiforma text-blue-600">
+          <div className={`text-lg font-semibold ${selectedStatus === "completed" ? "text-white" : "text-blue-600"}`}>
             {getStatusCount("completed")}
           </div>
-          <div className="text-base">Completed</div>
+          <div className={`text-xs font-medium ${selectedStatus === "completed" ? "text-white" : "text-gray-600"}`}>Completed</div>
         </button>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-red-700 text-body font-uber">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 flex items-center gap-2 text-sm">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <p className="text-red-700">{error}</p>
         </div>
       )}
 
       {/* Bookings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => (
             <BookingCard key={booking.id} booking={booking} />
           ))
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-            <Calendar className="w-12 h-12 mb-4" />
-            <h3 className="text-h5-mobile md:text-h4-desktop font-axiforma mb-2">
+          <div className="col-span-full flex flex-col items-center justify-center py-8 text-gray-500">
+            <Calendar className="w-8 h-8 mb-3" />
+            <h3 className="text-sm font-medium mb-1">
               No bookings found
             </h3>
-            <p className="text-center text-body font-uber">
+            <p className="text-center text-xs">
               {selectedStatus === "all"
                 ? "No bookings have been made yet."
                 : `No ${selectedStatus} bookings found.`}

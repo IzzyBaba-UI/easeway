@@ -1,23 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Access denied. Admin role required." },
-        { status: 403 }
-      );
-    }
-
     // Get URL search parameters
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
@@ -79,23 +64,6 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
     const { bookingId, status, notes } = body;
 
