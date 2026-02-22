@@ -35,8 +35,8 @@ const pricingConfig: Record<
   },
   home: { new: "£80", followup: "£70", newDuration: 40, followupDuration: 30 },
   sports: {
-    new: "£40",
-    followup: "£35",
+    new: "£45",
+    followup: "£40",
     newDuration: 40,
     followupDuration: 30,
   },

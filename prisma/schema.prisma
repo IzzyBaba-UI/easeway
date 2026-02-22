@@ -63,6 +63,7 @@ model Booking {
   name            String
   email           String
   phone           String
+  dateOfBirth     String?
   service         String
   serviceCategory String?  // "clinic", "home", "sports"
   date            String
@@ -90,6 +91,7 @@ model ClinicSettings {
   breakEnd      String?  // Format: "HH:MM"
   blockedPeriods Json?   // Array of {start: "HH:MM", end: "HH:MM", reason: "string"}
   workingDays   Json     @default("[1,2,3,4,5]") // Array of day numbers (0=Sunday, 1=Monday, etc.)
+  dailySchedule Json?    // Per-day schedule: {"0":{"open":"13:00","close":"16:00","enabled":true},...}
   timeSlotDuration Int   @default(30) // Duration in minutes
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())

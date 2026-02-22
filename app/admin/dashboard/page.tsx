@@ -28,6 +28,12 @@ interface BlockedPeriod {
   reason: string;
 }
 
+interface DaySchedule {
+  open: string;
+  close: string;
+  enabled: boolean;
+}
+
 interface ClinicSettings {
   id?: string;
   openingTime: string;
@@ -38,6 +44,7 @@ interface ClinicSettings {
   workingDays: number[];
   timeSlotDuration: number;
   isActive: boolean;
+  dailySchedule: Record<string, DaySchedule>;
 }
 
 const dayNames = [
@@ -50,6 +57,16 @@ const dayNames = [
   "Saturday",
 ];
 
+const DEFAULT_DAILY_SCHEDULE: Record<string, DaySchedule> = {
+  "0": { open: "13:00", close: "16:00", enabled: true },
+  "1": { open: "19:00", close: "21:00", enabled: true },
+  "2": { open: "19:00", close: "21:00", enabled: true },
+  "3": { open: "19:00", close: "21:00", enabled: true },
+  "4": { open: "19:00", close: "21:00", enabled: true },
+  "5": { open: "19:00", close: "21:00", enabled: true },
+  "6": { open: "09:00", close: "16:00", enabled: true },
+};
+
 const AdminDashboard = () => {
   const { isAuthenticated, isLoading, logout } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<
@@ -57,13 +74,14 @@ const AdminDashboard = () => {
   >("schedule");
   const [settings, setSettings] = useState<ClinicSettings>({
     openingTime: "09:00",
-    closingTime: "17:00",
+    closingTime: "21:00",
     breakStart: "",
     breakEnd: "",
     blockedPeriods: [],
-    workingDays: [1, 2, 3, 4, 5],
+    workingDays: [0, 1, 2, 3, 4, 5, 6],
     timeSlotDuration: 30,
     isActive: true,
+    dailySchedule: DEFAULT_DAILY_SCHEDULE,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -83,7 +101,11 @@ const AdminDashboard = () => {
         if (response.ok) {
           const data = await response.json();
           if (data.settings) {
-            setSettings(data.settings);
+            setSettings({
+              ...data.settings,
+              dailySchedule:
+                data.settings.dailySchedule || DEFAULT_DAILY_SCHEDULE,
+            });
           }
         } else {
           console.error("Failed to fetch settings");
@@ -136,13 +158,24 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleWorkingDayToggle = (dayIndex: number) => {
-    setSettings((prev) => ({
-      ...prev,
-      workingDays: prev.workingDays.includes(dayIndex)
-        ? prev.workingDays.filter((day) => day !== dayIndex)
-        : [...prev.workingDays, dayIndex].sort(),
-    }));
+  const handleDayScheduleChange = (
+    dayIndex: number,
+    field: keyof DaySchedule,
+    value: string | boolean
+  ) => {
+    setSettings((prev) => {
+      const schedule = { ...prev.dailySchedule };
+      schedule[String(dayIndex)] = {
+        ...schedule[String(dayIndex)],
+        [field]: value,
+      };
+      // Sync workingDays array from enabled days
+      const workingDays = Object.entries(schedule)
+        .filter(([, s]) => s.enabled)
+        .map(([d]) => parseInt(d))
+        .sort();
+      return { ...prev, dailySchedule: schedule, workingDays };
+    });
   };
 
   const addBlockedPeriod = () => {
@@ -285,47 +318,92 @@ const AdminDashboard = () => {
               transition={{ duration: 0.4 }}
               className="space-y-4"
             >
-              {/* Basic Hours Settings */}
+              {/* Daily Schedule */}
               <div className="bg-white rounded-lg shadow-sm p-4">
                 <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  Operating Hours
+                  Daily Schedule
                 </h3>
+                <p className="text-xs text-gray-500 mb-3">
+                  Set opening and closing times for each day. Toggle days
+                  on/off.
+                </p>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-700 font-medium mb-1">
-                      Opening Time
-                    </label>
-                    <input
-                      type="time"
-                      value={settings.openingTime}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          openingTime: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  {/* Day order: Mon-Sun */}
+                  {[1, 2, 3, 4, 5, 6, 0].map((dayIndex) => {
+                    const schedule =
+                      settings.dailySchedule[String(dayIndex)] ||
+                      DEFAULT_DAILY_SCHEDULE[String(dayIndex)];
+                    return (
+                      <div
+                        key={dayIndex}
+                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${
+                          schedule.enabled
+                            ? "bg-white border-gray-200"
+                            : "bg-gray-50 border-gray-100"
+                        }`}
+                      >
+                        <label className="flex items-center gap-2 min-w-[90px]">
+                          <input
+                            type="checkbox"
+                            checked={schedule.enabled}
+                            onChange={(e) =>
+                              handleDayScheduleChange(
+                                dayIndex,
+                                "enabled",
+                                e.target.checked
+                              )
+                            }
+                            className="w-4 h-4 text-[#FF3133] rounded focus:ring-[#FF3133] focus:ring-2"
+                          />
+                          <span
+                            className={`text-sm font-medium ${
+                              schedule.enabled
+                                ? "text-gray-900"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {dayNames[dayIndex].slice(0, 3)}
+                          </span>
+                        </label>
 
-                  <div>
-                    <label className="block text-xs text-gray-700 font-medium mb-1">
-                      Closing Time
-                    </label>
-                    <input
-                      type="time"
-                      value={settings.closingTime}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          closingTime: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
-                    />
-                  </div>
+                        {schedule.enabled ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <input
+                              type="time"
+                              value={schedule.open}
+                              onChange={(e) =>
+                                handleDayScheduleChange(
+                                  dayIndex,
+                                  "open",
+                                  e.target.value
+                                )
+                              }
+                              className="p-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                            />
+                            <span className="text-xs text-gray-400">to</span>
+                            <input
+                              type="time"
+                              value={schedule.close}
+                              onChange={(e) =>
+                                handleDayScheduleChange(
+                                  dayIndex,
+                                  "close",
+                                  e.target.value
+                                )
+                              }
+                              className="p-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">
+                            Closed
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-3">
@@ -347,73 +425,6 @@ const AdminDashboard = () => {
                     <option value={45}>45 minutes</option>
                     <option value={60}>60 minutes</option>
                   </select>
-                </div>
-              </div>
-
-              {/* Break Period */}
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">
-                  Break Period (Optional)
-                </h3>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-700 font-medium mb-1">
-                      Break Start
-                    </label>
-                    <input
-                      type="time"
-                      value={settings.breakStart || ""}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          breakStart: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-700 font-medium mb-1">
-                      Break End
-                    </label>
-                    <input
-                      type="time"
-                      value={settings.breakEnd || ""}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          breakEnd: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Working Days */}
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Working Days
-                </h3>
-
-                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-                  {dayNames.map((day, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleWorkingDayToggle(index)}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        settings.workingDays.includes(index)
-                          ? "bg-[#FF3133] text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {day.slice(0, 3)}
-                    </button>
-                  ))}
                 </div>
               </div>
 

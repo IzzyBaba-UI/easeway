@@ -45,15 +45,18 @@ function isTimeSlotBlocked(
   return false;
 }
 
-// Daily schedule override (0=Sunday ... 6=Saturday)
-const DAILY_SCHEDULE: Record<number, { open: string; close: string }> = {
-  1: { open: "19:00", close: "21:00" }, // Monday
-  2: { open: "19:00", close: "21:00" }, // Tuesday
-  3: { open: "19:00", close: "21:00" }, // Wednesday
-  4: { open: "19:00", close: "21:00" }, // Thursday
-  5: { open: "19:00", close: "21:00" }, // Friday
-  6: { open: "09:30", close: "16:00" }, // Saturday
-  0: { open: "13:00", close: "16:00" }, // Sunday
+// Default daily schedule (used when no dailySchedule is saved in DB)
+const DEFAULT_DAILY_SCHEDULE: Record<
+  string,
+  { open: string; close: string; enabled: boolean }
+> = {
+  "0": { open: "13:00", close: "16:00", enabled: true }, // Sunday
+  "1": { open: "19:00", close: "21:00", enabled: true }, // Monday
+  "2": { open: "19:00", close: "21:00", enabled: true }, // Tuesday
+  "3": { open: "19:00", close: "21:00", enabled: true }, // Wednesday
+  "4": { open: "19:00", close: "21:00", enabled: true }, // Thursday
+  "5": { open: "19:00", close: "21:00", enabled: true }, // Friday
+  "6": { open: "09:00", close: "16:00", enabled: true }, // Saturday
 };
 
 // Helper function to safely parse JSON
@@ -145,10 +148,15 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check if the selected day is a working day
-    const workingDays = safeParseJSON(settings.workingDays, [1, 2, 3, 4, 5]);
+    // Get daily schedule from DB or use defaults
+    const dailySchedule = safeParseJSON<
+      Record<string, { open: string; close: string; enabled: boolean }>
+    >(settings.dailySchedule, DEFAULT_DAILY_SCHEDULE);
 
-    if (!workingDays.includes(dayOfWeek)) {
+    const daySchedule = dailySchedule[String(dayOfWeek)];
+
+    // Check if this day is enabled
+    if (!daySchedule || !daySchedule.enabled) {
       const dayNames = [
         "Sunday",
         "Monday",
@@ -158,24 +166,15 @@ export async function GET(request: NextRequest) {
         "Friday",
         "Saturday",
       ];
-      // If a specific daily schedule is defined for this day, treat it as a working day
-      if (!DAILY_SCHEDULE[dayOfWeek]) {
-        return NextResponse.json({
-          availableSlots: [],
-          message: `Clinic is closed on ${dayNames[dayOfWeek]}s`,
-        });
-      }
+      return NextResponse.json({
+        availableSlots: [],
+        message: `Clinic is closed on ${dayNames[dayOfWeek]}s`,
+      });
     }
 
-    // Calculate time slots
-    // If a daily schedule is defined for the day, use it instead of global settings
-    const daySchedule = DAILY_SCHEDULE[dayOfWeek];
-    const openingMinutes = timeToMinutes(
-      daySchedule ? daySchedule.open : settings.openingTime
-    );
-    const closingMinutes = timeToMinutes(
-      daySchedule ? daySchedule.close : settings.closingTime
-    );
+    // Use the day's specific schedule
+    const openingMinutes = timeToMinutes(daySchedule.open);
+    const closingMinutes = timeToMinutes(daySchedule.close);
     const slotDuration = settings.timeSlotDuration;
 
     const availableSlots: string[] = [];
@@ -254,8 +253,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       availableSlots,
       clinicInfo: {
-        openingTime: daySchedule ? daySchedule.open : settings.openingTime,
-        closingTime: daySchedule ? daySchedule.close : settings.closingTime,
+        openingTime: daySchedule.open,
+        closingTime: daySchedule.close,
         isOpen: true,
       },
     });

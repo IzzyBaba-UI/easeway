@@ -38,6 +38,12 @@ interface BlockedSlot {
   createdAt?: string;
 }
 
+interface DaySchedule {
+  open: string;
+  close: string;
+  enabled: boolean;
+}
+
 interface ClinicSettings {
   openingTime: string;
   closingTime: string;
@@ -47,7 +53,18 @@ interface ClinicSettings {
   workingDays: number[];
   timeSlotDuration: number;
   isActive: boolean;
+  dailySchedule?: Record<string, DaySchedule>;
 }
+
+const DEFAULT_DAILY_SCHEDULE: Record<string, DaySchedule> = {
+  "0": { open: "13:00", close: "16:00", enabled: true },
+  "1": { open: "19:00", close: "21:00", enabled: true },
+  "2": { open: "19:00", close: "21:00", enabled: true },
+  "3": { open: "19:00", close: "21:00", enabled: true },
+  "4": { open: "19:00", close: "21:00", enabled: true },
+  "5": { open: "19:00", close: "21:00", enabled: true },
+  "6": { open: "09:00", close: "16:00", enabled: true },
+};
 
 interface CalendarScheduleProps {
   refreshInterval?: number;
@@ -76,15 +93,17 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
     isActive: true,
   });
 
-  // Generate time slots based on clinic settings
-  const generateTimeSlots = () => {
+  const dailySchedule =
+    clinicSettings.dailySchedule || DEFAULT_DAILY_SCHEDULE;
+
+  // Generate time slots for a specific day of week
+  const generateTimeSlotsForDay = (dayOfWeek: number) => {
+    const schedule = dailySchedule[String(dayOfWeek)];
+    if (!schedule || !schedule.enabled) return [];
+
     const slots: string[] = [];
-    const [openHour, openMin] = clinicSettings.openingTime
-      .split(":")
-      .map(Number);
-    const [closeHour, closeMin] = clinicSettings.closingTime
-      .split(":")
-      .map(Number);
+    const [openHour, openMin] = schedule.open.split(":").map(Number);
+    const [closeHour, closeMin] = schedule.close.split(":").map(Number);
     const duration = clinicSettings.timeSlotDuration || 30;
 
     let currentMinutes = openHour * 60 + openMin;
@@ -132,7 +151,15 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
     return slots;
   };
 
-  const timeSlots = generateTimeSlots();
+  // Get all unique time slots across the displayed days (for week view rows)
+  const getAllTimeSlots = (days: Date[]) => {
+    const allSlots = new Set<string>();
+    for (const day of days) {
+      const slots = generateTimeSlotsForDay(day.getDay());
+      slots.forEach((s) => allSlots.add(s));
+    }
+    return Array.from(allSlots).sort();
+  };
 
   // Get days for current week
   const getWeekDays = (date: Date) => {
@@ -153,7 +180,16 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
   const weekDays = getWeekDays(currentDate);
 
   const isWorkingDay = (date: Date) => {
-    return clinicSettings.workingDays.includes(date.getDay());
+    const schedule = dailySchedule[String(date.getDay())];
+    return schedule?.enabled ?? false;
+  };
+
+  // Check if a time falls within a day's schedule
+  const isTimeInDaySchedule = (dayOfWeek: number, time: string) => {
+    const schedule = dailySchedule[String(dayOfWeek)];
+    if (!schedule || !schedule.enabled) return false;
+    const slots = generateTimeSlotsForDay(dayOfWeek);
+    return slots.includes(time);
   };
 
   const fetchClinicSettings = async () => {
@@ -162,7 +198,11 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
       if (response.ok) {
         const data = await response.json();
         if (data.settings) {
-          setClinicSettings(data.settings);
+          setClinicSettings({
+            ...data.settings,
+            dailySchedule:
+              data.settings.dailySchedule || DEFAULT_DAILY_SCHEDULE,
+          });
         }
       }
     } catch (err) {
@@ -396,99 +436,122 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
     );
   };
 
-  const WeekView = () => (
-    <div className="grid grid-cols-8 gap-1">
-      {/* Time column header */}
-      <div className="font-medium text-gray-700 p-1 text-xs">Time</div>
+  const WeekView = () => {
+    const allTimeSlots = getAllTimeSlots(weekDays);
 
-      {/* Day headers */}
-      {weekDays.map((day) => {
-        const working = isWorkingDay(day);
-        return (
-          <div key={day.toISOString()} className="text-center p-1">
-            <div
-              className={`font-medium text-xs ${working ? "text-gray-900" : "text-gray-400"}`}
-            >
-              {formatDateDisplay(day)}
+    return (
+      <div className="grid grid-cols-8 gap-1">
+        {/* Time column header */}
+        <div className="font-medium text-gray-700 p-1 text-xs">Time</div>
+
+        {/* Day headers */}
+        {weekDays.map((day) => {
+          const working = isWorkingDay(day);
+          const schedule = dailySchedule[String(day.getDay())];
+          return (
+            <div key={day.toISOString()} className="text-center p-1">
+              <div
+                className={`font-medium text-xs ${working ? "text-gray-900" : "text-gray-400"}`}
+              >
+                {formatDateDisplay(day)}
+              </div>
+              {working && schedule ? (
+                <span className="text-xs text-gray-400">
+                  {schedule.open}-{schedule.close}
+                </span>
+              ) : (
+                <span className="text-xs text-red-400 font-medium">
+                  Closed
+                </span>
+              )}
             </div>
-            {!working && (
-              <span className="text-xs text-red-400 font-medium">Closed</span>
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
 
-      {/* Time slots */}
-      {timeSlots.map((time) => (
-        <React.Fragment key={time}>
-          {/* Time label */}
-          <div className="p-1 text-xs text-gray-700 border-r">{time}</div>
+        {/* Time slots */}
+        {allTimeSlots.map((time) => (
+          <React.Fragment key={time}>
+            {/* Time label */}
+            <div className="p-1 text-xs text-gray-700 border-r">{time}</div>
 
-          {/* Day slots */}
-          {weekDays.map((day) => {
-            const dateStr = formatDate(day);
-            const working = isWorkingDay(day);
+            {/* Day slots */}
+            {weekDays.map((day) => {
+              const dateStr = formatDate(day);
+              const working = isWorkingDay(day);
+              const inSchedule = isTimeInDaySchedule(day.getDay(), time);
 
-            if (!working) {
+              if (!working || !inSchedule) {
+                return (
+                  <div
+                    key={`${dateStr}-${time}`}
+                    className="p-1.5 border rounded text-xs bg-gray-100 border-gray-200 text-gray-400 min-h-[50px] flex items-center justify-center"
+                  >
+                    <span className="text-xs">
+                      {!working ? "Closed" : ""}
+                    </span>
+                  </div>
+                );
+              }
+
               return (
-                <div
+                <TimeSlot
                   key={`${dateStr}-${time}`}
-                  className="p-1.5 border rounded text-xs bg-gray-100 border-gray-200 text-gray-400 min-h-[50px] flex items-center justify-center"
-                >
-                  <span className="text-xs">Closed</span>
-                </div>
+                  date={dateStr}
+                  time={time}
+                />
               );
-            }
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
 
-            return (
+  const DayView = () => {
+    const daySlots = generateTimeSlotsForDay(currentDate.getDay());
+    const schedule = dailySchedule[String(currentDate.getDay())];
+
+    return (
+      <div className="max-w-sm mx-auto">
+        <div className="text-center mb-4">
+          <h3 className="text-sm font-medium text-gray-900">
+            {currentDate.toLocaleDateString("en-GB", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </h3>
+          {isWorkingDay(currentDate) && schedule ? (
+            <p className="text-xs text-gray-500 mt-1">
+              {schedule.open} - {schedule.close}
+            </p>
+          ) : (
+            <p className="text-xs text-red-500 mt-1 font-medium">
+              Clinic is closed on this day
+            </p>
+          )}
+        </div>
+
+        {isWorkingDay(currentDate) && daySlots.length > 0 ? (
+          <div className="space-y-1.5">
+            {daySlots.map((time) => (
               <TimeSlot
-                key={`${dateStr}-${time}`}
-                date={dateStr}
+                key={time}
+                date={formatDate(currentDate)}
                 time={time}
               />
-            );
-          })}
-        </React.Fragment>
-      ))}
-    </div>
-  );
-
-  const DayView = () => (
-    <div className="max-w-sm mx-auto">
-      <div className="text-center mb-4">
-        <h3 className="text-sm font-medium text-gray-900">
-          {currentDate.toLocaleDateString("en-GB", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </h3>
-        {!isWorkingDay(currentDate) && (
-          <p className="text-xs text-red-500 mt-1 font-medium">
-            Clinic is closed on this day
-          </p>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-400">
+            <CalendarIcon className="w-10 h-10 mx-auto mb-3" />
+            <p className="text-sm">This is a non-working day.</p>
+          </div>
         )}
       </div>
-
-      {isWorkingDay(currentDate) ? (
-        <div className="space-y-1.5">
-          {timeSlots.map((time) => (
-            <TimeSlot
-              key={time}
-              date={formatDate(currentDate)}
-              time={time}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 text-gray-400">
-          <CalendarIcon className="w-10 h-10 mx-auto mb-3" />
-          <p className="text-sm">This is a non-working day.</p>
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   const BlockModal = () => {
     if (!showBlockModal || !selectedSlot) return null;
@@ -615,7 +678,6 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
           </h2>
           <p className="text-xs text-gray-500">
             View bookings and manage availability (
-            {clinicSettings.openingTime} - {clinicSettings.closingTime},{" "}
             {clinicSettings.timeSlotDuration}min slots)
           </p>
         </div>

@@ -10,6 +10,7 @@ interface HomeVisitFormData {
   name: string;
   email: string;
   phone: string;
+  dateOfBirth: string;
   message: string;
   howCanWeHelp: string;
   sessionType: "new" | "followup";
@@ -29,6 +30,7 @@ const HomeVisitBookingForm: React.FC<HomeVisitBookingFormProps> = ({
     name: "",
     email: "",
     phone: "",
+    dateOfBirth: "",
     message: "",
     howCanWeHelp: "",
     sessionType: "new",
@@ -65,6 +67,9 @@ const HomeVisitBookingForm: React.FC<HomeVisitBookingFormProps> = ({
     }
     if (!formData.phone.trim()) {
       errors.phone = "Phone number is required";
+    }
+    if (!formData.dateOfBirth) {
+      errors.dateOfBirth = "Date of birth is required";
     }
     if (!formData.howCanWeHelp.trim()) {
       errors.howCanWeHelp = "Please describe how we can help you";
@@ -115,6 +120,7 @@ const HomeVisitBookingForm: React.FC<HomeVisitBookingFormProps> = ({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth,
         serviceCategory: isVirtual ? "virtual" : "home",
         service: isVirtual ? "Virtual Consultation" : "Home Visit",
         date: "TBD", // home & virtual consultations are scheduled manually
@@ -354,28 +360,54 @@ const HomeVisitBookingForm: React.FC<HomeVisitBookingFormProps> = ({
           </div>
         </div>
 
-        <div>
-          <label className="block text-[#0E2127] font-medium mb-3 text-base">
-            Email Address *
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
-              formErrors.email
-                ? "border-red-300 focus:ring-red-500 bg-red-50"
-                : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
-            }`}
-            placeholder="your.email@example.com"
-          />
-          {formErrors.email && (
-            <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
-              <AlertCircle className="w-4 h-4" />
-              {formErrors.email}
-            </p>
-          )}
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label className="block text-[#0E2127] font-medium mb-3 text-base">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                formErrors.email
+                  ? "border-red-300 focus:ring-red-500 bg-red-50"
+                  : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
+              }`}
+              placeholder="your.email@example.com"
+            />
+            {formErrors.email && (
+              <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                <AlertCircle className="w-4 h-4" />
+                {formErrors.email}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-[#0E2127] font-medium mb-3 text-base">
+              Date of Birth *
+            </label>
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleInputChange}
+              max={new Date().toISOString().split("T")[0]}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                formErrors.dateOfBirth
+                  ? "border-red-300 focus:ring-red-500 bg-red-50"
+                  : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
+              }`}
+            />
+            {formErrors.dateOfBirth && (
+              <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                <AlertCircle className="w-4 h-4" />
+                {formErrors.dateOfBirth}
+              </p>
+            )}
+          </div>
         </div>
 
         <div>

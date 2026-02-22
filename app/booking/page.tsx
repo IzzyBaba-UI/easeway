@@ -100,6 +100,9 @@ const BookingPage = () => {
         if (!bookingData.phone.trim()) {
           errors.phone = "Phone number is required";
         }
+        if (!bookingData.dateOfBirth) {
+          errors.dateOfBirth = "Date of birth is required";
+        }
         if (!bookingData.howCanWeHelp.trim()) {
           errors.howCanWeHelp = "Please describe how we can help you";
         } else {
@@ -173,7 +176,7 @@ const BookingPage = () => {
       case 1:
         return bookingData.sessionType !== null;
       case 2:
-        return bookingData.name && bookingData.email && bookingData.phone;
+        return bookingData.name && bookingData.email && bookingData.phone && bookingData.dateOfBirth;
       case 3:
         return bookingData.date && bookingData.time;
       case 4:
@@ -235,6 +238,7 @@ const BookingPage = () => {
         name: bookingData.name,
         email: bookingData.email,
         phone: bookingData.phone,
+        dateOfBirth: bookingData.dateOfBirth,
         serviceCategory: bookingData.serviceCategory,
         service: getServiceName(bookingData.serviceCategory),
         date: bookingData.date,
@@ -461,6 +465,31 @@ const BookingPage = () => {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                  Date of Birth *
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={bookingData.dateOfBirth}
+                  onChange={handleInputChange}
+                  required
+                  max={new Date().toISOString().split("T")[0]}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                    formErrors.dateOfBirth
+                      ? "border-red-300 focus:ring-red-500 bg-red-50"
+                      : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
+                  }`}
+                />
+                {formErrors.dateOfBirth && (
+                  <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                    <AlertCircle className="w-4 h-4" />
+                    {formErrors.dateOfBirth}
+                  </p>
+                )}
+              </div>
+
               <div className="sm:col-span-2">
                 <label className="block text-[#0E2127] font-medium mb-3 text-base">
                   Email Address *
@@ -664,6 +693,18 @@ const BookingPage = () => {
                     <span className="text-gray-600 text-base">Email:</span>
                     <span className="font-medium text-base text-right break-all">
                       {bookingData.email}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-start py-2">
+                    <span className="text-gray-600 text-base">Date of Birth:</span>
+                    <span className="font-medium text-base text-right">
+                      {bookingData.dateOfBirth
+                        ? new Date(bookingData.dateOfBirth).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "—"}
                     </span>
                   </div>
                   <div className="flex justify-between items-start py-2">

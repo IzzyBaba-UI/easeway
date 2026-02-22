@@ -25,6 +25,7 @@ interface Booking {
   name: string;
   email: string;
   phone: string;
+  dateOfBirth?: string;
   service: string;
   date: string;
   time: string;
@@ -463,6 +464,18 @@ const BookingManagement: React.FC<BookingManagementProps> = ({
                       {selectedBooking.phone}
                     </p>
                   </div>
+                  {selectedBooking.dateOfBirth && (
+                    <div>
+                      <label className="text-xs text-gray-500">Date of Birth</label>
+                      <p className="text-sm text-gray-900">
+                        {new Date(selectedBooking.dateOfBirth).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
