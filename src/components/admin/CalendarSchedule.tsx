@@ -49,7 +49,7 @@ interface ClinicSettings {
   closingTime: string;
   breakStart?: string;
   breakEnd?: string;
-  blockedPeriods?: { start: string; end: string; reason: string }[];
+  blockedPeriods?: { start: string; end: string; reason: string; days?: number[] }[];
   workingDays: number[];
   timeSlotDuration: number;
   isActive: boolean;
@@ -130,6 +130,10 @@ const CalendarSchedule: React.FC<CalendarScheduleProps> = ({
       if (clinicSettings.blockedPeriods) {
         for (const period of clinicSettings.blockedPeriods) {
           if (period.start && period.end) {
+            // Skip if the blocked period has specific days and this day isn't included
+            if (period.days && period.days.length > 0 && !period.days.includes(dayOfWeek)) {
+              continue;
+            }
             const [psH, psM] = period.start.split(":").map(Number);
             const [peH, peM] = period.end.split(":").map(Number);
             const pStartMin = psH * 60 + psM;

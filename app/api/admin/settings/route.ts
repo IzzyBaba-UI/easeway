@@ -6,6 +6,7 @@ interface BlockedPeriod {
   start: string;
   end: string;
   reason: string;
+  days?: number[];
 }
 
 interface DaySchedule {
@@ -186,6 +187,17 @@ export async function POST(request: NextRequest) {
         if (startMinutes >= endMinutes) {
           return NextResponse.json(
             { error: "Blocked period start time must be before end time" },
+            { status: 400 }
+          );
+        }
+
+        if (
+          period.days &&
+          (!Array.isArray(period.days) ||
+            period.days.some((d: number) => d < 0 || d > 6))
+        ) {
+          return NextResponse.json(
+            { error: "Blocked period days must be an array of numbers 0-6." },
             { status: 400 }
           );
         }
