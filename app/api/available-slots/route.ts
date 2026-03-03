@@ -10,6 +10,7 @@ interface BlockedPeriod {
   start: string;
   end: string;
   reason: string;
+  days?: number[];
 }
 
 // Helper function to convert time string to minutes
@@ -31,9 +32,20 @@ function minutesToTime(minutes: number): string {
 function isTimeSlotBlocked(
   slotStart: number,
   slotEnd: number,
-  blockedPeriods: BlockedPeriod[]
+  blockedPeriods: BlockedPeriod[],
+  dayOfWeek?: number
 ): boolean {
   for (const blocked of blockedPeriods) {
+    // If the blocked period has specific days, check if the current day matches
+    if (
+      dayOfWeek !== undefined &&
+      blocked.days &&
+      blocked.days.length > 0 &&
+      !blocked.days.includes(dayOfWeek)
+    ) {
+      continue;
+    }
+
     const blockedStart = timeToMinutes(blocked.start);
     const blockedEnd = timeToMinutes(blocked.end);
 
@@ -238,7 +250,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Check blocked periods from settings
-      const isBlocked = isTimeSlotBlocked(slotStart, slotEnd, blockedPeriods);
+      const isBlocked = isTimeSlotBlocked(slotStart, slotEnd, blockedPeriods, dayOfWeek);
 
       // Check if time is booked or blocked (O(1) lookup)
       const isBooked = bookedTimes.has(timeString);

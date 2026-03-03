@@ -501,6 +501,37 @@ const AdminDashboard = () => {
                       </button>
                     </div>
                   </div>
+                  <div className="mt-2">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Days (leave empty for all days)
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {dayNames.map((day, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() =>
+                            setNewBlockedPeriod((prev) => {
+                              const days = prev.days || [];
+                              return {
+                                ...prev,
+                                days: days.includes(i)
+                                  ? days.filter((d) => d !== i)
+                                  : [...days, i].sort(),
+                              };
+                            })
+                          }
+                          className={`px-2 py-1 text-xs rounded-md border transition-colors ${
+                            (newBlockedPeriod.days || []).includes(i)
+                              ? "bg-[#FF3133] text-white border-[#FF3133]"
+                              : "bg-white text-gray-600 border-gray-300 hover:border-[#FF3133]"
+                          }`}
+                        >
+                          {day.slice(0, 3)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Current Blocked Periods */}
@@ -520,6 +551,11 @@ const AdminDashboard = () => {
                           </span>
                           <span className="text-red-600 ml-2 text-xs">
                             ({period.reason})
+                          </span>
+                          <span className="text-red-500 ml-2 text-xs">
+                            {period.days && period.days.length > 0
+                              ? period.days.map((d) => dayNames[d].slice(0, 3)).join(", ")
+                              : "All days"}
                           </span>
                         </div>
                         <button

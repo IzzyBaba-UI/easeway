@@ -169,7 +169,7 @@ export const BlockOf5Info = () => {
                 Sports Massage
               </div>
               <div className="text-base text-blue-600">
-                New: £190 | Follow-up: £165
+                £190
               </div>
             </div>
           </div>
