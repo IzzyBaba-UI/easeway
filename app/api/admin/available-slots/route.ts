@@ -45,14 +45,18 @@ function isTimeSlotBlocked(
   return false;
 }
 
-const DAILY_SCHEDULE: Record<number, { open: string; close: string }> = {
-  1: { open: "19:00", close: "21:00" },
-  2: { open: "19:00", close: "21:00" },
-  3: { open: "19:00", close: "21:00" },
-  4: { open: "19:00", close: "21:00" },
-  5: { open: "19:00", close: "21:00" },
-  6: { open: "09:30", close: "16:00" },
-  0: { open: "13:00", close: "16:00" },
+// Default daily schedule (used when no dailySchedule is saved in DB)
+const DEFAULT_DAILY_SCHEDULE: Record<
+  string,
+  { open: string; close: string; enabled: boolean }
+> = {
+  "0": { open: "13:00", close: "16:00", enabled: true }, // Sunday
+  "1": { open: "19:00", close: "21:00", enabled: true }, // Monday
+  "2": { open: "19:00", close: "21:00", enabled: true }, // Tuesday
+  "3": { open: "19:00", close: "21:00", enabled: true }, // Wednesday
+  "4": { open: "19:00", close: "21:00", enabled: true }, // Thursday
+  "5": { open: "19:00", close: "21:00", enabled: true }, // Friday
+  "6": { open: "09:00", close: "16:00", enabled: true }, // Saturday
 };
 
 // GET - Fetch available time slots for a specific date
@@ -109,28 +113,36 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check if the selected day is a working day
-    const workingDays = Array.isArray(settings.workingDays)
-      ? settings.workingDays
-      : JSON.parse(settings.workingDays as string);
-
-    if (!workingDays.includes(dayOfWeek)) {
-      // allow if schedule override exists
-      if (!DAILY_SCHEDULE[dayOfWeek]) {
-        return NextResponse.json({
-          availableSlots: [],
-          message: "Clinic is closed on this day",
-        });
+    // Get daily schedule from DB or use defaults
+    const dailyScheduleRaw = settings.dailySchedule;
+    let dailySchedule: Record<
+      string,
+      { open: string; close: string; enabled: boolean }
+    >;
+    if (dailyScheduleRaw && typeof dailyScheduleRaw === "object") {
+      dailySchedule = dailyScheduleRaw as typeof dailySchedule;
+    } else if (typeof dailyScheduleRaw === "string") {
+      try {
+        dailySchedule = JSON.parse(dailyScheduleRaw);
+      } catch {
+        dailySchedule = DEFAULT_DAILY_SCHEDULE;
       }
+    } else {
+      dailySchedule = DEFAULT_DAILY_SCHEDULE;
     }
 
-    const daySchedule = DAILY_SCHEDULE[dayOfWeek];
-    const openingMinutes = timeToMinutes(
-      daySchedule ? daySchedule.open : settings.openingTime
-    );
-    const closingMinutes = timeToMinutes(
-      daySchedule ? daySchedule.close : settings.closingTime
-    );
+    const daySchedule = dailySchedule[String(dayOfWeek)];
+
+    // Check if this day is enabled
+    if (!daySchedule || !daySchedule.enabled) {
+      return NextResponse.json({
+        availableSlots: [],
+        message: "Clinic is closed on this day",
+      });
+    }
+
+    const openingMinutes = timeToMinutes(daySchedule.open);
+    const closingMinutes = timeToMinutes(daySchedule.close);
     const slotDuration = settings.timeSlotDuration;
 
     const availableSlots: string[] = [];
@@ -188,10 +200,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       availableSlots,
       settings: {
-        openingTime: daySchedule ? daySchedule.open : settings.openingTime,
-        closingTime: daySchedule ? daySchedule.close : settings.closingTime,
+        openingTime: daySchedule.open,
+        closingTime: daySchedule.close,
         timeSlotDuration: settings.timeSlotDuration,
-        workingDays: workingDays,
+        dailySchedule,
       },
     });
   } catch (error) {

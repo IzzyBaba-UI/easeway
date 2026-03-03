@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
       name,
       email,
       phone,
+      dateOfBirth,
       service,
       serviceCategory, // added
       date,
@@ -130,6 +131,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone,
+        dateOfBirth: dateOfBirth || null,
         service,
         date: bookingDate,
         time: bookingTime,
@@ -151,6 +153,7 @@ export async function POST(request: NextRequest) {
       name,
       email,
       phone,
+      dateOfBirth,
       service,
       serviceCategory,
       date: bookingDate,

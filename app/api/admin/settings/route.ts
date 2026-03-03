@@ -8,6 +8,12 @@ interface BlockedPeriod {
   reason: string;
 }
 
+interface DaySchedule {
+  open: string;
+  close: string;
+  enabled: boolean;
+}
+
 interface ClinicSettingsData {
   openingTime: string;
   closingTime: string;
@@ -17,6 +23,7 @@ interface ClinicSettingsData {
   workingDays: number[];
   timeSlotDuration: number;
   isActive: boolean;
+  dailySchedule?: Record<string, DaySchedule>;
 }
 
 // GET - Fetch current clinic settings
@@ -32,15 +39,26 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const DEFAULT_DAILY_SCHEDULE: Record<string, DaySchedule> = {
+      "0": { open: "13:00", close: "16:00", enabled: true },
+      "1": { open: "19:00", close: "21:00", enabled: true },
+      "2": { open: "19:00", close: "21:00", enabled: true },
+      "3": { open: "19:00", close: "21:00", enabled: true },
+      "4": { open: "19:00", close: "21:00", enabled: true },
+      "5": { open: "19:00", close: "21:00", enabled: true },
+      "6": { open: "09:00", close: "16:00", enabled: true },
+    };
+
     // If no settings exist, create default settings
     if (!settings) {
       const defaultSettings = await prisma.clinicSettings.create({
         data: {
           openingTime: "09:00",
-          closingTime: "17:00",
-          workingDays: [1, 2, 3, 4, 5], // Monday to Friday
+          closingTime: "21:00",
+          workingDays: [0, 1, 2, 3, 4, 5, 6],
           timeSlotDuration: 30,
           isActive: true,
+          dailySchedule: DEFAULT_DAILY_SCHEDULE as never,
         },
       });
 
@@ -48,7 +66,8 @@ export async function GET(request: NextRequest) {
         settings: {
           ...defaultSettings,
           blockedPeriods: defaultSettings.blockedPeriods || [],
-          workingDays: defaultSettings.workingDays || [1, 2, 3, 4, 5],
+          workingDays: defaultSettings.workingDays || [0, 1, 2, 3, 4, 5, 6],
+          dailySchedule: defaultSettings.dailySchedule || DEFAULT_DAILY_SCHEDULE,
         },
       });
     }
@@ -57,7 +76,8 @@ export async function GET(request: NextRequest) {
       settings: {
         ...settings,
         blockedPeriods: settings.blockedPeriods || [],
-        workingDays: settings.workingDays || [1, 2, 3, 4, 5],
+        workingDays: settings.workingDays || [0, 1, 2, 3, 4, 5, 6],
+        dailySchedule: settings.dailySchedule || DEFAULT_DAILY_SCHEDULE,
       },
     });
   } catch (error) {
@@ -85,6 +105,7 @@ export async function POST(request: NextRequest) {
       workingDays,
       timeSlotDuration,
       isActive,
+      dailySchedule,
     } = body;
 
     // Validate required fields
@@ -182,6 +203,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate dailySchedule if provided
+    if (dailySchedule) {
+      const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      for (const [day, schedule] of Object.entries(dailySchedule)) {
+        const dayNum = parseInt(day);
+        if (isNaN(dayNum) || dayNum < 0 || dayNum > 6) {
+          return NextResponse.json(
+            { error: `Invalid day number: ${day}` },
+            { status: 400 }
+          );
+        }
+        if (schedule.enabled) {
+          if (
+            !timePattern.test(schedule.open) ||
+            !timePattern.test(schedule.close)
+          ) {
+            return NextResponse.json(
+              { error: `Invalid time format for day ${day}. Use HH:MM.` },
+              { status: 400 }
+            );
+          }
+          const [oh, om] = schedule.open.split(":").map(Number);
+          const [ch, cm] = schedule.close.split(":").map(Number);
+          if (oh * 60 + om >= ch * 60 + cm) {
+            return NextResponse.json(
+              {
+                error: `Opening time must be before closing time for day ${day}.`,
+              },
+              { status: 400 }
+            );
+          }
+        }
+      }
+    }
+
     // Check if settings already exist
     const existingSettings = await prisma.clinicSettings.findFirst();
 
@@ -198,6 +254,9 @@ export async function POST(request: NextRequest) {
           workingDays,
           timeSlotDuration,
           isActive,
+          ...(dailySchedule
+            ? { dailySchedule: dailySchedule as never }
+            : {}),
         },
       });
 
@@ -218,6 +277,9 @@ export async function POST(request: NextRequest) {
           workingDays,
           timeSlotDuration,
           isActive,
+          ...(dailySchedule
+            ? { dailySchedule: dailySchedule as never }
+            : {}),
         },
       });
 

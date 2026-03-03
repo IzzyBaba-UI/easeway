@@ -90,7 +90,7 @@ const Pricing = () => {
       icon: Waves,
       name: "Initial Session",
       duration: "40 minutes",
-      price: "£40",
+      price: "£45",
       description: [
         "Movement and muscle assessment",
         "Targeted massage therapy",
@@ -102,7 +102,7 @@ const Pricing = () => {
       icon: Waves,
       name: "Follow-up Session",
       duration: "30 minutes",
-      price: "£35",
+      price: "£40",
       description: [
         "Focused massage treatment",
         "Recovery optimization",

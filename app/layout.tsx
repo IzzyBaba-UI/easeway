@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "../src/index.css";
 import "../src/fonts.css";
 import ClientProviders from "./providers";
@@ -95,6 +96,18 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17918838357"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17918838357');
+          `}
+        </Script>
       </head>
       <body>
         <ClientProviders>{children}</ClientProviders>

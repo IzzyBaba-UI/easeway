@@ -23,6 +23,7 @@ export interface BookingFormData {
   name: string;
   email: string;
   phone: string;
+  dateOfBirth: string;
   emergencyContact: string;
 
   // Appointment details
@@ -58,6 +59,7 @@ const initialBookingData: BookingFormData = {
   name: "",
   email: "",
   phone: "",
+  dateOfBirth: "",
   emergencyContact: "",
   service: "",
   date: "",
