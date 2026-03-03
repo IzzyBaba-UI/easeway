@@ -26,6 +26,7 @@ interface BlockedPeriod {
   start: string;
   end: string;
   reason: string;
+  days?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat. Empty/undefined = all days
 }
 
 interface DaySchedule {
@@ -90,6 +91,7 @@ const AdminDashboard = () => {
     start: "",
     end: "",
     reason: "",
+    days: [],
   });
 
   useEffect(() => {
@@ -188,7 +190,7 @@ const AdminDashboard = () => {
         ...prev,
         blockedPeriods: [...prev.blockedPeriods, { ...newBlockedPeriod }],
       }));
-      setNewBlockedPeriod({ start: "", end: "", reason: "" });
+      setNewBlockedPeriod({ start: "", end: "", reason: "", days: [] });
     }
   };
 
