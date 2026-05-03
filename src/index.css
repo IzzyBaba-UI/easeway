@@ -6,7 +6,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-size: clamp(16px, 4vw, 24px);
+  font-size: 16px;
   font-family: "Uber Move", "Axiforma", sans-serif;
   scroll-behavior: smooth;
   font-weight: 400;
@@ -16,7 +16,7 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   * {
-    font-size: clamp(14px, 4vw, 18px);
+    font-size: 15px;
   }
 }
 
@@ -69,7 +69,7 @@ h6 {
 }
 
 h1 {
-  font-size: 2.5rem !important;
+  font-size: 2.5rem;
   font-weight: 700;
 }
 h2 {
@@ -100,7 +100,7 @@ li {
   font-weight: 400;
 }
 a {
-  font-size: 16px !important;
+  font-size: 16px;
   text-decoration: none;
   color: #000;
   font-family: "Uber Move", sans-serif;
@@ -118,11 +118,11 @@ a {
 
 @layer base {
   button {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     font-family: "Uber Move", sans-serif;
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
+    padding: 0.875rem 1.5rem;
+    border-radius: 9999px;
     cursor: pointer;
     background: #0e2127;
     color: #fff;
@@ -137,6 +137,40 @@ a {
     border-radius: 0;
     font-size: inherit;
     font-weight: inherit;
+  }
+}
+
+@layer components {
+  .site-container {
+    @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#FF3133] px-6 py-3.5 font-axiforma text-[15px] font-semibold leading-none text-white transition-colors hover:bg-[#e62a2c] sm:py-4 sm:text-[16px];
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#0E2127] px-6 py-3.5 font-axiforma text-[15px] font-semibold leading-none text-white transition-colors hover:bg-[#18343d] sm:py-4 sm:text-[16px];
+  }
+
+  .btn-outline-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3.5 font-axiforma text-[15px] font-semibold leading-none text-white backdrop-blur transition-colors hover:bg-white/20 sm:py-4 sm:text-[16px];
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-6 py-3.5 font-axiforma text-[15px] font-semibold leading-none text-gray-900 transition-colors hover:border-[#FF3133]/40 hover:text-[#FF3133] sm:py-4 sm:text-[16px];
+  }
+
+  .text-link {
+    @apply inline-flex items-center gap-2 font-axiforma text-[16px] font-semibold text-[#FF3133] transition-colors hover:text-[#d7282a];
+  }
+
+  .section-eyebrow {
+    @apply font-axiforma text-[15px] font-semibold uppercase tracking-[0.12em] text-[#FF3133];
+  }
+
+  .section-title {
+    @apply font-axiforma text-[30px] font-semibold leading-tight text-gray-950 sm:text-[36px];
   }
 }
 
@@ -174,7 +208,7 @@ body {
 
 @media (max-width: 768px) {
   h1 {
-    font-size: 2.5rem !important;
+    font-size: 2.5rem;
   }
   h2 {
     font-size: 2rem;
@@ -193,7 +227,7 @@ body {
     font-size: 16px;
   }
   a {
-    font-size: 16px !important;
+    font-size: 16px;
   }
 }
 

@@ -19,10 +19,10 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({
       {/* Desktop/Tablet Linear Stepper */}
       <div className="hidden sm:block">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-base font-medium text-gray-900">
+          <span className="text-[16px] font-medium text-gray-900">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-base text-gray-600">
+          <span className="text-[16px] text-gray-600">
             {Math.round(((currentStep + 1) / steps.length) * 100)}%
           </span>
         </div>
@@ -76,7 +76,7 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({
                   {/* Step Label */}
                   <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-16 text-center">
                     <span
-                      className={`text-base font-medium truncate block ${
+                      className={`block truncate text-[14px] font-medium ${
                         isCompleted || isCurrent
                           ? "text-[#FF3133]"
                           : "text-gray-500"
@@ -95,10 +95,10 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({
       {/* Mobile Stepper */}
       <div className="sm:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-base font-medium text-gray-900">
+          <span className="text-[16px] font-medium text-gray-900">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-base text-gray-600">
+          <span className="text-[16px] text-gray-600">
             {Math.round(((currentStep + 1) / steps.length) * 100)}%
           </span>
         </div>
@@ -117,7 +117,7 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({
 
         {/* Current Step Label */}
         <div className="text-center">
-          <span className="text-base font-medium text-[#FF3133]">
+          <span className="text-[16px] font-medium text-[#FF3133]">
             {steps[currentStep]}
           </span>
         </div>

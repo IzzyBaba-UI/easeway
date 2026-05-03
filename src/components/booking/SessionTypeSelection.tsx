@@ -48,7 +48,7 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
         </h3>
       </div>
 
-      <p className="text-base text-gray-600 mb-6 font-uber">
+      <p className="text-[16px] sm:text-[18px] text-gray-600 mb-6 font-uber">
         Please select the type of session you would like to book
       </p>
 
@@ -97,7 +97,7 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
               {/* Content */}
               <div>
                 <h4
-                  className={`font-semibold mb-3 text-base ${
+                  className={`font-semibold mb-3 text-[16px] sm:text-[18px] ${
                     isSelected ? "text-[#FF3133]" : "text-[#0E2127]"
                   }`}
                 >
@@ -107,18 +107,18 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-base text-gray-600 font-uber">
+                    <span className="text-[16px] sm:text-[18px] text-gray-600 font-uber">
                       {session.duration} minutes
                     </span>
                   </div>
                   {session.price && (
-                    <div className="text-base font-medium text-[#0E2127]">
+                    <div className="text-[16px] sm:text-[18px] font-medium text-[#0E2127]">
                       {session.price}
                     </div>
                   )}
                 </div>
 
-                <p className="text-base text-gray-600 font-uber leading-relaxed">
+                <p className="text-[16px] sm:text-[18px] text-gray-600 font-uber leading-relaxed">
                   {session.description}
                 </p>
               </div>
@@ -146,7 +146,7 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
         >
           <div className="flex items-center gap-2 mb-2">
             <Check className="w-4 h-4 text-[#FF3133]" />
-            <span className="text-[#FF3133] font-medium text-base">
+            <span className="text-[#FF3133] font-medium text-[16px] sm:text-[18px]">
               Selected: {selectedSession.name}
             </span>
           </div>

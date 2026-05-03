@@ -14,15 +14,21 @@ export interface SessionType {
 interface SessionTypeSelectionProps {
   selectedSession: SessionType | null;
   onSessionSelect: (session: SessionType) => void;
-  serviceCategory?: "clinic" | "home" | "virtual" | "sports" | ""; // added virtual
+  serviceCategory?:
+    | "clinic"
+    | "home"
+    | "virtual"
+    | "sports"
+    | "acupuncture"
+    | "";
 }
 
 // Pricing configuration per service category
 const pricingConfig: Record<
   string,
   {
-    new: string;
-    followup: string;
+    new?: string;
+    followup?: string;
     newDuration: number;
     followupDuration: number;
   }
@@ -41,11 +47,14 @@ const pricingConfig: Record<
     followupDuration: 30,
   },
   virtual: {
-    // align with clinic pricing or custom; adjust as needed
     new: "£55",
     followup: "£45",
     newDuration: 40,
     followupDuration: 30,
+  },
+  acupuncture: {
+    newDuration: 60,
+    followupDuration: 45,
   },
 };
 
@@ -57,7 +66,7 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
   // Require service selection first
   if (!serviceCategory) {
     return (
-      <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center text-base text-gray-600 font-uber">
+      <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center font-uber text-[16px] text-gray-600">
         Please select a service type first.
       </div>
     );
@@ -84,16 +93,16 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-[#FF3133]/10 rounded-full flex items-center justify-center">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF3133]/10">
           <Clock className="w-5 h-5 text-[#FF3133]" />
         </div>
-        <h3 className="text-base font-axiforma text-[#0E2127]">
+        <h3 className="font-axiforma text-[24px] text-[#0E2127]">
           Session Type & Duration
         </h3>
       </div>
 
-      <p className="text-base text-gray-600 mb-6 font-uber">
+      <p className="mb-6 font-uber text-[16px] leading-6 text-gray-600">
         Select whether this is a new session or a follow-up for your chosen
         service.
       </p>
@@ -110,7 +119,7 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
               onClick={() => onSessionSelect(session)}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              className={`relative p-5 rounded-lg border-2 transition-all duration-200 text-left ${
+              className={`relative rounded-lg border p-5 text-left transition-all duration-200 ${
                 isSelected
                   ? "border-[#FF3133] bg-[#FF3133]/5"
                   : "border-gray-200 bg-white hover:border-[#FF3133]/50"
@@ -120,14 +129,14 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute top-3 right-3 w-6 h-6 bg-[#FF3133] rounded-full flex items-center justify-center"
+                  className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#FF3133]"
                 >
                   <Check className="w-4 h-4 text-white" />
                 </motion.div>
               )}
 
               <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
+                className={`mb-4 flex h-10 w-10 items-center justify-center rounded-full ${
                   isSelected ? "bg-[#FF3133]" : "bg-gray-100"
                 }`}
               >
@@ -140,7 +149,7 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
 
               <div>
                 <h4
-                  className={`font-semibold mb-3 text-base ${
+                  className={`mb-3 text-[17px] font-semibold ${
                     isSelected ? "text-[#FF3133]" : "text-[#0E2127]"
                   }`}
                 >
@@ -149,22 +158,22 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-base text-gray-600 font-uber">
+                    <span className="font-uber text-[16px] text-gray-600">
                       {session.duration} minutes
                     </span>
                   </div>
                   {session.price && (
-                    <div className="text-base font-medium text-[#0E2127]">
+                    <div className="text-[16px] font-medium text-[#0E2127]">
                       {session.price}
                     </div>
                   )}
                 </div>
-                <p className="text-base text-gray-600 font-uber leading-relaxed">
+                <p className="font-uber text-[16px] leading-6 text-gray-600">
                   {session.description}
                 </p>
               </div>
               <div
-                className={`absolute bottom-3 right-3 px-2 py-1 rounded-full text-body-xs font-axiforma ${
+                className={`absolute bottom-3 right-3 rounded-full px-2 py-1 font-axiforma text-[14px] ${
                   isSelected
                     ? "bg-[#FF3133] text-white"
                     : "bg-gray-200 text-gray-600"
@@ -181,17 +190,17 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-6 p-4 bg-[#FF3133]/5 border border-[#FF3133]/20 rounded-lg"
+          className="mt-6 rounded-lg border border-[#FF3133]/20 bg-[#FF3133]/5 p-4"
         >
           <div className="flex items-center gap-2 mb-2">
             <Check className="w-4 h-4 text-[#FF3133]" />
-            <span className="text-[#FF3133] font-medium text-base">
+            <span className="text-[16px] font-medium text-[#FF3133]">
               Selected: {selectedSession.name}
             </span>
           </div>
-          <p className="text-body text-gray-600 font-uber">
-            Duration: {selectedSession.duration} minutes |{" "}
-            {selectedSession.price}
+          <p className="font-uber text-[16px] text-gray-600">
+            Duration: {selectedSession.duration} minutes
+            {selectedSession.price ? ` | ${selectedSession.price}` : ""}
           </p>
         </motion.div>
       )}

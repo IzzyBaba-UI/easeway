@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const AboutUs = () => {
   return (
     <section className="py-8 sm:py-12 md:py-16 lg:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
           {/* Left Content */}
           <motion.div
@@ -17,20 +17,20 @@ const AboutUs = () => {
           >
             {/* Badge */}
             <motion.div
-              className="inline-flex items-center px-3 sm:px-4 py-2 bg-[#FF3133]/5 border border-[#FF3133]/10 rounded-full"
+              className="inline-flex items-center rounded-full border border-[#FF3133]/10 bg-[#FF3133]/5 px-3 py-2 sm:px-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <span className="text-[#FF3133] text-body-xs sm:text-body-sm font-medium">
-                🩺 About Us
+              <span className="text-[15px] font-semibold text-[#FF3133]">
+                About Us
               </span>
             </motion.div>
 
             <div>
               <motion.h2
-                className="text-h3-mobile sm:text-h2-small font-axiforma text-[#0E2127] leading-tight"
+                className="font-axiforma text-[30px] leading-tight text-[#0E2127] sm:text-[36px]"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
@@ -39,7 +39,7 @@ const AboutUs = () => {
                 About Easeway Medicare Physiotherapy Clinic
               </motion.h2>
 
-              <p className="text-body text-gray-600 leading-relaxed mt-3 sm:mt-4 font-uber">
+              <p className="mt-3 font-uber text-[17px] leading-7 text-gray-600 sm:mt-4">
                 At Easeway Medicare Physiotherapy Clinic, we believe that
                 everyone deserves to live without pain and move freely. Our
                 dedicated team is committed to providing personalized,
@@ -56,19 +56,19 @@ const AboutUs = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <div className="bg-white p-2 sm:p-3 rounded-xl text-center border border-gray-100">
-                <div className="text-body-lg sm:text-h3-mobile md:text-h4-desktop font-axiforma text-[#FF3133] mb-1 sm:mb-2">
+              <div className="rounded-lg border border-gray-100 bg-white p-3 text-center shadow-sm">
+                <div className="mb-1 font-axiforma text-[26px] text-[#FF3133] sm:mb-2 sm:text-[30px]">
                   500+
                 </div>
-                <div className="text-base sm:text-body text-gray-600 font-uber font-medium">
+                <div className="font-uber text-[15px] font-medium text-gray-600 sm:text-[16px]">
                   Patients Treated
                 </div>
               </div>
-              <div className="bg-white p-2 sm:p-3 rounded-xl text-center border border-gray-100">
-                <div className="text-body-lg sm:text-h3-mobile md:text-h4-desktop font-axiforma text-[#FF3133] mb-1 sm:mb-2">
+              <div className="rounded-lg border border-gray-100 bg-white p-3 text-center shadow-sm">
+                <div className="mb-1 font-axiforma text-[26px] text-[#FF3133] sm:mb-2 sm:text-[30px]">
                   10+
                 </div>
-                <div className="text-base sm:text-body text-gray-600 font-uber font-medium">
+                <div className="font-uber text-[15px] font-medium text-gray-600 sm:text-[16px]">
                   Years Experience
                 </div>
               </div>
@@ -89,10 +89,10 @@ const AboutUs = () => {
               ].map((feature) => (
                 <div
                   key={feature}
-                  className="flex items-center space-x-2 bg-[#0E2127]/10 px-3 sm:px-4 py-2 rounded-full border border-gray-100"
+                  className="flex items-center space-x-2 rounded-full border border-gray-100 bg-[#0E2127]/10 px-3 py-2 sm:px-4"
                 >
                   <div className="w-1 h-1 bg-[#FF3133] rounded-full"></div>
-                  <span className="text-base sm:text-[14px] font-medium text-[#0E2127]">
+                  <span className="text-[16px] font-medium text-[#0E2127]">
                     {feature}
                   </span>
                 </div>
@@ -111,7 +111,7 @@ const AboutUs = () => {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {/* Large image top-left */}
               <motion.div
-                className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-xl row-span-2"
+                className="relative row-span-2 overflow-hidden rounded-lg shadow-lg"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
@@ -125,24 +125,24 @@ const AboutUs = () => {
 
               {/* Small image top-right */}
               <motion.div
-                className="relative rounded-xl sm:rounded-2xl overflow-hidden"
+                className="relative overflow-hidden rounded-lg"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
                 <img
                   src="/images/fx1.jpg"
                   alt="Modern physiotherapy equipment"
-                  className="w-full h-32 object-cover"
+                  className="h-36 w-full object-cover sm:h-40 lg:h-44"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0E2127]/20 to-transparent" />
               </motion.div>
 
               {/* Small image bottom-right */}
-              <motion.div className="relative rounded-2xl overflow-hidden">
+              <motion.div className="relative overflow-hidden rounded-lg">
                 <motion.img
                   src="/images/fx8.jpg"
                   alt="Patient recovery success"
-                  className="w-full h-32 object-cover"
+                  className="h-36 w-full object-cover sm:h-40 lg:h-44"
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.3 }}
                 ></motion.img>
@@ -151,12 +151,12 @@ const AboutUs = () => {
             </div>
 
             {/* Floating element */}
-            <motion.div className="absolute -top-4 -right-4 bg-[#FF3133] text-white p-4 rounded-2xl shadow-2xl">
+            <motion.div className="absolute -right-3 -top-3 rounded-lg bg-[#FF3133] p-4 text-white shadow-xl sm:-right-4 sm:-top-4">
               <div className="text-center">
-                <div className="text-h3-mobile md:text-h4-desktop font-axiforma">
+                <div className="font-axiforma text-[26px] sm:text-[30px]">
                   98%
                 </div>
-                <div className="text-body-xs font-axiforma">Success Rate</div>
+                <div className="font-axiforma text-[14px]">Success Rate</div>
               </div>
             </motion.div>
           </motion.div>

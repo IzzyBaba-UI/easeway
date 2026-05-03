@@ -33,8 +33,8 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <section className="py-16 sm:py-18 md:py-20 bg-[#0e2127] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+    <section className="bg-[#0e2127] py-16 text-white sm:py-20 md:py-24">
+      <div className="site-container">
         <div className="text-center mb-12 sm:mb-14 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -42,12 +42,12 @@ const WhyChooseUs = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-h3-mobile sm:text-h2-small font-axiforma mb-3 sm:mb-4 flex items-center justify-center gap-2 sm:gap-3">
-              <Handshake className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#FF3133]" />
+            <h2 className="mb-3 flex items-center justify-center gap-2 font-axiforma text-[30px] sm:mb-4 sm:gap-3 sm:text-[36px]">
+              <Handshake className="h-6 w-6 text-[#FF3133] sm:h-7 sm:w-7" />
               {""}
               Why Choose Us?
             </h2>
-            <p className="text-body text-gray-200 max-w-xl mx-auto px-4 font-uber">
+            <p className="mx-auto max-w-xl px-4 font-uber text-[17px] leading-7 text-gray-200">
               Your health and recovery are our priority. Here's what sets us
               apart.
             </p>
@@ -62,20 +62,20 @@ const WhyChooseUs = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group"
+              className="group rounded-lg border border-white/10 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-6"
             >
-              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#FF3133]/10 rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
-                <reason.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#FF3133]" />
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#FF3133]/10 transition-transform duration-300 group-hover:scale-105 sm:mb-6 sm:h-14 sm:w-14">
+                <reason.icon className="h-6 w-6 text-[#FF3133] sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-h6-mobile sm:text-h5-desktop font-axiforma text-[#0E2127] mb-3 sm:mb-4">
+              <h3 className="mb-3 font-axiforma text-[20px] text-[#0E2127] sm:mb-4">
                 {reason.title}
               </h3>
-              <p className="text-body text-gray-600 leading-relaxed font-uber">
+              <p className="font-uber text-[16px] leading-7 text-gray-600">
                 {reason.description}
               </p>
 
               {/* Hover effect border */}
-              <div className="w-0 h-1 bg-[#FF3133] mt-4 sm:mt-6 group-hover:w-full transition-all duration-300"></div>
+              <div className="mt-4 h-1 w-0 bg-[#FF3133] transition-all duration-300 group-hover:w-full sm:mt-6"></div>
             </motion.div>
           ))}
         </div>
@@ -86,13 +86,13 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          className="text-center mt-12 sm:mt-14 md:mt-16"
+          className="mt-12 text-center sm:mt-14 md:mt-16"
         >
-          <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg max-w-2xl mx-auto">
-            <h3 className="text-body-lg sm:text-h4-small font-axiforma text-[#0E2127] mb-3 sm:mb-4">
+          <div className="mx-auto max-w-2xl rounded-lg border border-white/10 bg-white p-6 shadow-sm sm:p-8">
+            <h3 className="mb-3 font-axiforma text-[24px] text-[#0E2127] sm:mb-4 sm:text-[26px]">
               Ready to Start Your Recovery Journey?
             </h3>
-            <p className="text-gray-600 mb-4 sm:mb-6 text-body font-uber px-2">
+            <p className="mb-4 px-2 font-uber text-[17px] leading-7 text-gray-600 sm:mb-6">
               Experience the difference personalized physiotherapy care can make
               in your life.
             </p>

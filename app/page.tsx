@@ -18,7 +18,7 @@ export default function HomePage() {
       <main className="flex-1">
         <div className="flex flex-col">
           <HeroSection />
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="site-container">
             <Info />
             <RevealOnScroll>
               <AboutUs />
@@ -36,7 +36,7 @@ export default function HomePage() {
           {/* <RevealOnScroll>
  <Testimonials />
  </RevealOnScroll> */}
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="site-container">
             <RevealOnScroll>
               <LeaveReview />
             </RevealOnScroll>

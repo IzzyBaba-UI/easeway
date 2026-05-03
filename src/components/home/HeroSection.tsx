@@ -3,48 +3,34 @@ import { MyFillButton } from "../reusables/Button";
 
 const HeroSection: React.FC = () => {
   return (
-    <section className="min-h-full sm:min-h-[90vh] flex items-center bg-white py-3 sm:py-2">
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 w-full">
-        <div className="relative sm:mx-4">
-          {/* Background Image */}
-          <div
-            className="relative h-[85vh] md:h-[85vh] bg-cover bg-center bg-no-repeat rounded-xl sm:rounded-2xl overflow-hidden"
-            style={{
-              backgroundImage: `url(/images/fx4.jpg)`,
-            }}
-          >
-            {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/50 rounded-xl sm:rounded-2xl"></div>
+    <section
+      className="relative flex min-h-[640px] items-center overflow-hidden bg-cover bg-center bg-no-repeat py-20 sm:min-h-[760px] lg:min-h-[820px]"
+      style={{
+        backgroundImage: `url(/images/fx4.jpg)`,
+      }}
+    >
+      <div className="absolute inset-0 bg-black/55" />
+      <div className="site-container relative z-10 w-full">
+        <div className="max-w-2xl">
+          <h1 className="mb-4 font-axiforma text-[38px] leading-tight text-white sm:mb-6 sm:text-[50px] lg:text-[58px]">
+            Musculoskeletal Physiotherapy
+          </h1>
 
-            {/* Text Content Overlay */}
-            <div className="absolute inset-0 flex items-center">
-              <div className="max-w-xl sm:max-w-2xl px-6 sm:px-8 md:px-16 lg:px-20">
-                {/* Main Heading */}
-                <h1 className="text-h1-mobile sm:text-h2-desktop md:text-h1-desktop lg:text-5xl xl:text-6xl font-axiforma text-white mb-4 sm:mb-6 leading-tight">
-                  Musculoskeletal Physiotherapy
-                </h1>
+          <p className="mb-7 max-w-xl font-uber text-[18px] leading-8 text-gray-100 sm:mb-9">
+            Overcome pain, regain mobility, and live life to the fullest with
+            Easeway Medicare Physiotherapy Clinic.
+          </p>
 
-                {/* Subtitle */}
-                <p className="text-body text-gray-400 mb-6 sm:mb-8 max-w-sm sm:max-w-sm leading-relaxed font-uber">
-                  Overcome pain, regain mobility, and live life to the fullest
-                  with Easeway Medicare Physiotherapy Clinic.
-                </p>
-
-                {/* Single CTA Button */}
-                <div>
-                  {""}
-                  <MyFillButton
-                    text="Book Appointment"
-                    link="/booking"
-                    bgColor="#FF3133"
-                    hoverBgColor="#e62a2c"
-                    color="white"
-                    hoverTextColor="white"
-                    ariaLabel="Book Appointment"
-                  />
-                </div>
-              </div>
-            </div>
+          <div>
+            <MyFillButton
+              text="Book Appointment"
+              link="/booking"
+              bgColor="#FF3133"
+              hoverBgColor="#e62a2c"
+              color="white"
+              hoverTextColor="white"
+              ariaLabel="Book Appointment"
+            />
           </div>
         </div>
       </div>
