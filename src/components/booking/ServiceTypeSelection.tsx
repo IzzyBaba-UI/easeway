@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Building2, Home, Waves, Check } from "lucide-react";
+import { Building2, Home, Target, Waves, Check } from "lucide-react";
 
 export interface ServiceTypeOption {
   key: string;
@@ -40,6 +40,12 @@ const serviceTypes: ServiceTypeOption[] = [
     description: "Performance & recovery focused soft tissue therapy",
     icon: Waves,
   },
+  {
+    key: "acupuncture",
+    label: "Acupuncture",
+    description: "Needling therapy integrated with physiotherapy care",
+    icon: Target,
+  },
 ];
 
 const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
@@ -63,11 +69,11 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
           Choose Service Type
         </h4>
         <p className="text-base text-gray-600 mb-4 font-uber">
-          Choose the type of service you are booking. This will determine
-          pricing for new & follow-up sessions.
+          Choose the type of service you are booking so we can prepare the
+          right appointment options.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {serviceTypes.map((service) => {
             const isSelected = selectedService === service.key;
             const Icon = service.icon;

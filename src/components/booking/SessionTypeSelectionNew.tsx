@@ -14,15 +14,21 @@ export interface SessionType {
 interface SessionTypeSelectionProps {
   selectedSession: SessionType | null;
   onSessionSelect: (session: SessionType) => void;
-  serviceCategory?: "clinic" | "home" | "virtual" | "sports" | ""; // added virtual
+  serviceCategory?:
+    | "clinic"
+    | "home"
+    | "virtual"
+    | "sports"
+    | "acupuncture"
+    | "";
 }
 
 // Pricing configuration per service category
 const pricingConfig: Record<
   string,
   {
-    new: string;
-    followup: string;
+    new?: string;
+    followup?: string;
     newDuration: number;
     followupDuration: number;
   }
@@ -41,11 +47,14 @@ const pricingConfig: Record<
     followupDuration: 30,
   },
   virtual: {
-    // align with clinic pricing or custom; adjust as needed
     new: "£55",
     followup: "£45",
     newDuration: 40,
     followupDuration: 30,
+  },
+  acupuncture: {
+    newDuration: 60,
+    followupDuration: 45,
   },
 };
 
@@ -190,8 +199,8 @@ const SessionTypeSelection: React.FC<SessionTypeSelectionProps> = ({
             </span>
           </div>
           <p className="text-body text-gray-600 font-uber">
-            Duration: {selectedSession.duration} minutes |{" "}
-            {selectedSession.price}
+            Duration: {selectedSession.duration} minutes
+            {selectedSession.price ? ` | ${selectedSession.price}` : ""}
           </p>
         </motion.div>
       )}

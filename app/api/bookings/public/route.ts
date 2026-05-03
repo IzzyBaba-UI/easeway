@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
         phone,
         dateOfBirth: dateOfBirth || null,
         service,
+        serviceCategory: serviceCategory || null,
         date: bookingDate,
         time: bookingTime,
         sessionType: sessionType || null,

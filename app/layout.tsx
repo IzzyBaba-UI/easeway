@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL?.startsWith("http")
       ? process.env.NEXT_PUBLIC_SITE_URL
-      : `https://${process.env.NEXT_PUBLIC_SITE_URL || "easewaymedicare.co.uk"}`
+      : `https://${
+          process.env.NEXT_PUBLIC_SITE_URL || "www.easewaymedicare.co.uk"
+        }`
   ),
   title: {
     default:
@@ -34,11 +36,11 @@ export const metadata: Metadata = {
     title: "Easeway Medicare Physiotherapy Clinic",
     description:
       "Professional physiotherapy services in Whittlesey, Peterborough",
-    url: "https://easewaymedicare.co.uk",
+    url: "https://www.easewaymedicare.co.uk",
     siteName: "Easeway Medicare Physiotherapy Clinic",
     images: [
       {
-        url: "/images/easeway_logo.png",
+        url: "https://www.easewaymedicare.co.uk/images/easeway_logo.png",
         width: 800,
         height: 600,
         alt: "Easeway Medicare Logo",
@@ -52,7 +54,7 @@ export const metadata: Metadata = {
     title: "Easeway Medicare Physiotherapy Clinic",
     description:
       "Professional physiotherapy services in Whittlesey, Peterborough",
-    images: ["/images/easeway_logo.png"],
+    images: ["https://www.easewaymedicare.co.uk/images/easeway_logo.png"],
   },
   robots: {
     index: true,
@@ -69,7 +71,7 @@ export const metadata: Metadata = {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
   alternates: {
-    canonical: "https://easewaymedicare.co.uk",
+    canonical: "https://www.easewaymedicare.co.uk",
   },
 };
 

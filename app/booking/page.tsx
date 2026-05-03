@@ -219,6 +219,8 @@ const BookingPage = () => {
         return "Clinic Consultation";
       case "sports":
         return "Sports Massage";
+      case "acupuncture":
+        return "Acupuncture";
       default:
         return "General Consultation";
     }
@@ -316,7 +318,12 @@ const BookingPage = () => {
   // Handle service category selection with home visit check
   const handleServiceTypeSelect = (serviceKey: string) => {
     updateBookingData({
-      serviceCategory: serviceKey as "clinic" | "home" | "virtual" | "sports",
+      serviceCategory: serviceKey as
+        | "clinic"
+        | "home"
+        | "virtual"
+        | "sports"
+        | "acupuncture",
     });
 
     if (serviceKey === "home" || serviceKey === "virtual") {

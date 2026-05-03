@@ -11,7 +11,13 @@ export interface SessionType {
 }
 
 // Added: service category determines price mapping
-export type ServiceCategory = "clinic" | "home" | "virtual" | "sports" | "";
+export type ServiceCategory =
+  | "clinic"
+  | "home"
+  | "virtual"
+  | "sports"
+  | "acupuncture"
+  | "";
 
 export interface BookingFormData {
   // Service category first

@@ -8,30 +8,45 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const menuItems = [
-    { label: "Services", href: "#services" },
-    { label: "Contact", href: "#contact" },
+    { label: "Services", href: "/services" },
+    { label: "Contact", href: "/#contact" },
   ];
 
   const handleMenuClick = (href: string) => {
-    // Close mobile menu first
     setIsMobileMenuOpen(false);
 
-    // Add a small delay to ensure the menu animation completes
     setTimeout(() => {
-      const element = document.querySelector(href);
-      if (element) {
-        const headerHeight = 80; // Approximate header height
-        const elementPosition =
-          element.getBoundingClientRect().top +
-          window.pageYOffset -
-          headerHeight;
+      if (href.startsWith("/#")) {
+        if (window.location.pathname !== "/") {
+          window.location.href = href;
+          return;
+        }
 
-        window.scrollTo({
-          top: elementPosition,
-          behavior: "smooth",
-        });
+        scrollToSection(href.slice(1));
+        return;
       }
+
+      if (href.startsWith("#")) {
+        scrollToSection(href);
+        return;
+      }
+
+      window.location.href = href;
     }, 100);
+  };
+
+  const scrollToSection = (selector: string) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      const headerHeight = 80;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+
+      window.scrollTo({
+        top: elementPosition,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
@@ -171,8 +186,10 @@ const Header = () => {
                 key={item.label}
                 href={item.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  handleMenuClick(item.href);
+                  if (item.href.startsWith("#") || item.href.startsWith("/#")) {
+                    e.preventDefault();
+                    handleMenuClick(item.href);
+                  }
                 }}
                 className="text-[#0E2127] hover:text-[#FF3133] transition-colors text-base font-medium"
               >
@@ -237,16 +254,25 @@ const Header = () => {
               {/* Mobile Navigation */}
               <nav className="space-y-3">
                 {menuItems.map((item) => (
-                  <div
+                  <a
                     key={item.label}
+                    href={item.href}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMenuClick(item.href);
+                      if (
+                        item.href.startsWith("#") ||
+                        item.href.startsWith("/#")
+                      ) {
+                        e.preventDefault();
+                        handleMenuClick(item.href);
+                      } else {
+                        setIsMobileMenuOpen(false);
+                      }
                     }}
                     className="block w-full text-left text-[#0E2127] hover:text-[#FF3133] transition-colors text-base font-medium py-2 cursor-pointer"
                   >
                     {item.label}
-                  </div>
+                  </a>
                 ))}
               </nav>
 

@@ -4,6 +4,13 @@ import { motion } from "framer-motion";
 import { Mail, Phone, Globe, MapPin } from "lucide-react";
 
 const Footer = () => {
+  const quickLinks = [
+    { label: "Home", href: "/" },
+    { label: "Services", href: "/services" },
+    { label: "Contact", href: "/#contact" },
+    { label: "Book Now", href: "/booking" },
+  ];
+
   return (
     <footer className="bg-gradient-to-br from-gray-900 to-black border-t border-gray-800/50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,27 +72,14 @@ const Footer = () => {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              {["Home", "Services", "Contact", "Book Now"].map((link) => (
-                <li key={link}>
-                  <button
-                    onClick={() => {
-                      if (link === "Home")
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      if (link === "Services")
-                        document
-                          .getElementById("services")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      if (link === "Contact")
-                        document
-                          .getElementById("contact")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      if (link === "Book Now")
-                        window.location.href = "/booking";
-                    }}
+              {quickLinks.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
                     className="text-gray-400 hover:text-white transition-all duration-300 font-light text-button-sm sm:text-button font-uber block"
                   >
-                    {link}
-                  </button>
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </motion.ul>
