@@ -51,13 +51,13 @@ const BookingPage = () => {
   const [showHomeVisitForm, setShowHomeVisitForm] = useState(false); // used for both home & virtual
   const [virtualMode, setVirtualMode] = useState(false); // distinguish which variant is active
 
+  const finalStep = 4;
   const stepTitles = [
-    "Service Selection",
-    "Session Type",
-    "Personal Info",
-    "Appointment Details",
-    "Information",
-    "Review & Confirm",
+    "Service",
+    "Session",
+    "Personal",
+    "Appointment",
+    "Review",
   ];
 
   const handleInputChange = (
@@ -134,9 +134,7 @@ const BookingPage = () => {
           errors.time = "Please select a time slot";
         }
         break;
-      case 4: // Medical Info (optional apart from message already required in form)
-        break;
-      case 5: // Review - Final validation
+      case 4: // Review - Final validation
         const allRequiredFields = {
           serviceCategory: "Service type",
           sessionType: "Session type",
@@ -180,8 +178,6 @@ const BookingPage = () => {
       case 3:
         return bookingData.date && bookingData.time;
       case 4:
-        return true; // medical info optional
-      case 5:
         return true; // review step
       default:
         return false;
@@ -190,7 +186,7 @@ const BookingPage = () => {
 
   const handleNext = () => {
     if (validateStep()) {
-      if (currentStep < 5) {
+      if (currentStep < finalStep) {
         setCurrentStep(currentStep + 1);
       }
     } else {
@@ -346,24 +342,24 @@ const BookingPage = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="bg-white border-b border-gray-100">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="border-b border-gray-100 bg-white">
+          <div className="site-container py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <Link
                 href="/"
-                className="flex items-center gap-3 text-[#0E2127] hover:text-[#FF3133] transition-colors group"
+                className="group flex items-center gap-3 text-[16px] font-semibold text-[#0E2127] transition-colors hover:text-[#FF3133]"
               >
                 <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                <span className="font-medium">Back to Home</span>
+                <span>Back to Home</span>
               </Link>
 
               <div className="sm:text-right">
-                <h3 className="text-lg sm:text-xl font-axiforma text-[#0E2127] mb-1">
+                <h3 className="mb-1 font-axiforma text-[24px] text-[#0E2127]">
                   {virtualMode
                     ? "Book Virtual Consultation"
                     : "Book Home Visit"}
                 </h3>
-                <p className="text-gray-600 text-base font-uber">
+                <p className="font-uber text-[16px] text-gray-600">
                   {virtualMode
                     ? "We'll contact you to arrange your video consultation"
                     : "We'll arrange a convenient time for your home visit"}
@@ -374,8 +370,8 @@ const BookingPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="site-container py-6 lg:py-8">
+          <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             <div className="p-4 sm:p-6 lg:p-8">
               <HomeVisitBookingForm
                 onBack={handleBackFromHomeVisit}
@@ -411,10 +407,10 @@ const BookingPage = () => {
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#FF3133]/10 rounded-full flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF3133]/10">
                 <User className="w-5 h-5 text-[#FF3133]" />
               </div>
-              <h3 className="text-base font-axiforma text-[#0E2127]">
+              <h3 className="font-axiforma text-[24px] text-[#0E2127]">
                 Personal Information
               </h3>
             </div>
@@ -422,7 +418,7 @@ const BookingPage = () => {
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-6">
                 <div>
-                  <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                  <label className="block text-[#0E2127] font-medium mb-3 text-[16px] sm:text-[18px]">
                     Full Name *
                   </label>
                   <input
@@ -431,7 +427,7 @@ const BookingPage = () => {
                     value={bookingData.name}
                     onChange={handleInputChange}
                     required
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-[16px] sm:text-[18px] ${
                       formErrors.name
                         ? "border-red-300 focus:ring-red-500 bg-red-50"
                         : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
@@ -439,7 +435,7 @@ const BookingPage = () => {
                     placeholder="Your full name"
                   />
                   {formErrors.name && (
-                    <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                    <p className="mt-2 text-[16px] sm:text-[18px] text-red-600 flex items-center gap-1 font-uber">
                       <AlertCircle className="w-4 h-4" />
                       {formErrors.name}
                     </p>
@@ -447,7 +443,7 @@ const BookingPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                  <label className="block text-[#0E2127] font-medium mb-3 text-[16px] sm:text-[18px]">
                     Phone Number *
                   </label>
                   <input
@@ -456,7 +452,7 @@ const BookingPage = () => {
                     value={bookingData.phone}
                     onChange={handleInputChange}
                     required
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-[16px] sm:text-[18px] ${
                       formErrors.phone
                         ? "border-red-300 focus:ring-red-500 bg-red-50"
                         : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
@@ -464,7 +460,7 @@ const BookingPage = () => {
                     placeholder="+44 7XXX XXXXXX"
                   />
                   {formErrors.phone && (
-                    <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                    <p className="mt-2 text-[16px] sm:text-[18px] text-red-600 flex items-center gap-1 font-uber">
                       <AlertCircle className="w-4 h-4" />
                       {formErrors.phone}
                     </p>
@@ -473,7 +469,7 @@ const BookingPage = () => {
               </div>
 
               <div>
-                <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                <label className="block text-[#0E2127] font-medium mb-3 text-[16px] sm:text-[18px]">
                   Date of Birth *
                 </label>
                 <input
@@ -483,14 +479,14 @@ const BookingPage = () => {
                   onChange={handleInputChange}
                   required
                   max={new Date().toISOString().split("T")[0]}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-[16px] sm:text-[18px] ${
                     formErrors.dateOfBirth
                       ? "border-red-300 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
                   }`}
                 />
                 {formErrors.dateOfBirth && (
-                  <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                  <p className="mt-2 text-[16px] sm:text-[18px] text-red-600 flex items-center gap-1 font-uber">
                     <AlertCircle className="w-4 h-4" />
                     {formErrors.dateOfBirth}
                   </p>
@@ -498,7 +494,7 @@ const BookingPage = () => {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                <label className="block text-[#0E2127] font-medium mb-3 text-[16px] sm:text-[18px]">
                   Email Address *
                 </label>
                 <input
@@ -507,7 +503,7 @@ const BookingPage = () => {
                   value={bookingData.email}
                   onChange={handleInputChange}
                   required
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-[16px] sm:text-[18px] ${
                     formErrors.email
                       ? "border-red-300 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
@@ -515,7 +511,7 @@ const BookingPage = () => {
                   placeholder="your.email@example.com"
                 />
                 {formErrors.email && (
-                  <p className="mt-2 text-base text-red-600 flex items-center gap-1 font-uber">
+                  <p className="mt-2 text-[16px] sm:text-[18px] text-red-600 flex items-center gap-1 font-uber">
                     <AlertCircle className="w-4 h-4" />
                     {formErrors.email}
                   </p>
@@ -524,7 +520,7 @@ const BookingPage = () => {
 
               {/* How can we help field */}
               <div className="sm:col-span-2">
-                <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                <label className="block text-[#0E2127] font-medium mb-3 text-[16px] sm:text-[18px]">
                   How can we help? *
                 </label>
                 <textarea
@@ -533,7 +529,7 @@ const BookingPage = () => {
                   onChange={handleInputChange}
                   required
                   rows={3}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base resize-y ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all text-[16px] sm:text-[18px] resize-y ${
                     formErrors.howCanWeHelp
                       ? "border-red-300 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 focus:ring-[#FF3133] hover:border-gray-400"
@@ -542,7 +538,7 @@ const BookingPage = () => {
                 />
                 <div className="flex justify-between items-center mt-2">
                   {formErrors.howCanWeHelp && (
-                    <p className="text-base text-red-600 flex items-center gap-1 font-uber">
+                    <p className="text-[16px] sm:text-[18px] text-red-600 flex items-center gap-1 font-uber">
                       <AlertCircle className="w-4 h-4" />
                       {formErrors.howCanWeHelp}
                     </p>
@@ -565,10 +561,10 @@ const BookingPage = () => {
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#FF3133]/10 rounded-full flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF3133]/10">
                 <Calendar className="w-5 h-5 text-[#FF3133]" />
               </div>
-              <h3 className="text-base font-axiforma text-[#0E2127]">
+              <h3 className="font-axiforma text-[24px] text-[#0E2127]">
                 Appointment Details
               </h3>
             </div>
@@ -576,7 +572,7 @@ const BookingPage = () => {
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[#0E2127] font-medium mb-3 text-base">
+                  <label className="block text-[#0E2127] font-medium mb-3 text-[16px] sm:text-[18px]">
                     Preferred Date *
                   </label>
                   <input
@@ -586,7 +582,7 @@ const BookingPage = () => {
                     onChange={handleInputChange}
                     min={today}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent transition-all hover:border-gray-400 text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3133] focus:border-transparent transition-all hover:border-gray-400 text-[16px] sm:text-[18px]"
                   />
                 </div>
               </div>
@@ -603,7 +599,7 @@ const BookingPage = () => {
 
               {bookingData.sessionType && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-base text-blue-800 font-uber">
+                  <p className="text-[16px] sm:text-[18px] text-blue-800 font-uber">
                     <span className="font-semibold">Selected:</span>{" "}
                     {bookingData.sessionType.name} (
                     {bookingData.sessionType.duration} minutes)
@@ -618,11 +614,11 @@ const BookingPage = () => {
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
-              <h3 className="text-base font-axiforma text-[#0E2127]">
-                Booking Confirmation
+              <h3 className="font-axiforma text-[24px] text-[#0E2127]">
+                Review and Confirm
               </h3>
             </div>
 
@@ -631,7 +627,7 @@ const BookingPage = () => {
                 <h4 className="text-lg font-axiforma text-[#0E2127] mb-2">
                   Please review your booking details
                 </h4>
-                <p className="text-gray-600 text-base font-uber">
+                <p className="text-gray-600 text-[16px] sm:text-[18px] font-uber">
                   Make sure all information is correct before submitting
                 </p>
               </div>
@@ -639,36 +635,36 @@ const BookingPage = () => {
               <div className="grid gap-6 lg:grid-cols-2">
                 {/* Session Details */}
                 <div className="space-y-4">
-                  <h5 className="font-semibold text-[#0E2127] text-base uppercase tracking-wide border-b border-gray-200 pb-2">
+                  <h5 className="font-semibold text-[#0E2127] text-[16px] sm:text-[18px] uppercase tracking-wide border-b border-gray-200 pb-2">
                     Session Details
                   </h5>
                   {bookingData.sessionType && (
                     <div className="flex justify-between items-start py-2">
-                      <span className="text-gray-600 text-base">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px]">
                         Session Type:
                       </span>
-                      <span className="font-medium text-base text-right">
+                      <span className="font-medium text-[16px] sm:text-[18px] text-right">
                         {bookingData.sessionType.name}
                       </span>
                     </div>
                   )}
                   {bookingData.sessionType && (
                     <div className="flex justify-between items-start py-2">
-                      <span className="text-gray-600 text-base">Duration:</span>
-                      <span className="font-medium text-base">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px]">Duration:</span>
+                      <span className="font-medium text-[16px] sm:text-[18px]">
                         {bookingData.sessionType.duration} minutes
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Service:</span>
-                    <span className="font-medium text-base text-right">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Service:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px] text-right">
                       {getServiceName(bookingData.serviceCategory)}
                     </span>
                   </div>
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Date:</span>
-                    <span className="font-medium text-base text-right">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Date:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px] text-right">
                       {new Date(bookingData.date).toLocaleDateString("en-GB", {
                         weekday: "long",
                         year: "numeric",
@@ -678,8 +674,8 @@ const BookingPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Time:</span>
-                    <span className="font-medium text-base">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Time:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px]">
                       {bookingData.time}
                     </span>
                   </div>
@@ -687,24 +683,24 @@ const BookingPage = () => {
 
                 {/* Personal Details */}
                 <div className="space-y-4">
-                  <h5 className="font-semibold text-[#0E2127] text-base uppercase tracking-wide border-b border-gray-200 pb-2">
+                  <h5 className="font-semibold text-[#0E2127] text-[16px] sm:text-[18px] uppercase tracking-wide border-b border-gray-200 pb-2">
                     Personal Details
                   </h5>
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Name:</span>
-                    <span className="font-medium text-base text-right">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Name:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px] text-right">
                       {bookingData.name}
                     </span>
                   </div>
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Email:</span>
-                    <span className="font-medium text-base text-right break-all">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Email:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px] text-right break-all">
                       {bookingData.email}
                     </span>
                   </div>
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Date of Birth:</span>
-                    <span className="font-medium text-base text-right">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Date of Birth:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px] text-right">
                       {bookingData.dateOfBirth
                         ? new Date(bookingData.dateOfBirth).toLocaleDateString("en-GB", {
                             day: "numeric",
@@ -715,8 +711,8 @@ const BookingPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-between items-start py-2">
-                    <span className="text-gray-600 text-base">Phone:</span>
-                    <span className="font-medium text-base">
+                    <span className="text-gray-600 text-[16px] sm:text-[18px]">Phone:</span>
+                    <span className="font-medium text-[16px] sm:text-[18px]">
                       {bookingData.phone}
                     </span>
                   </div>
@@ -726,55 +722,55 @@ const BookingPage = () => {
               {/* Medical Information */}
               {(bookingData.message || bookingData.howCanWeHelp) && (
                 <div className="space-y-4 pt-4 border-t border-gray-200">
-                  <h5 className="font-semibold text-[#0E2127] text-base uppercase tracking-wide">
+                  <h5 className="font-semibold text-[#0E2127] text-[16px] sm:text-[18px] uppercase tracking-wide">
                     Medical Information
                   </h5>
                   {/* {bookingData.howCanWeHelp && (
                     <div>
-                      <span className="text-gray-600 text-base block mb-2">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px] block mb-2">
                         How can we help:
                       </span>
-                      <p className="text-base bg-white p-3 rounded border text-gray-700 font-uber">
+                      <p className="text-[16px] sm:text-[18px] bg-white p-3 rounded border text-gray-700 font-uber">
                         {bookingData.howCanWeHelp}
                       </p>
                     </div>
                   )} */}
                   {bookingData.message && (
                     <div>
-                      <span className="text-gray-600 text-base block mb-2">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px] block mb-2">
                         Condition/Reason for visit:
                       </span>
-                      <p className="text-base bg-white p-3 rounded border text-gray-700 font-uber">
+                      <p className="text-[16px] sm:text-[18px] bg-white p-3 rounded border text-gray-700 font-uber">
                         {bookingData.message}
                       </p>
                     </div>
                   )}
                   {bookingData.medicalHistory && (
                     <div>
-                      <span className="text-gray-600 text-base block mb-2">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px] block mb-2">
                         Medical History:
                       </span>
-                      <p className="text-base bg-white p-3 rounded border text-gray-700 font-uber">
+                      <p className="text-[16px] sm:text-[18px] bg-white p-3 rounded border text-gray-700 font-uber">
                         {bookingData.medicalHistory}
                       </p>
                     </div>
                   )}
                   {bookingData.currentMedications && (
                     <div>
-                      <span className="text-gray-600 text-base block mb-2">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px] block mb-2">
                         Current Medications:
                       </span>
-                      <p className="text-base bg-white p-3 rounded border text-gray-700 font-uber">
+                      <p className="text-[16px] sm:text-[18px] bg-white p-3 rounded border text-gray-700 font-uber">
                         {bookingData.currentMedications}
                       </p>
                     </div>
                   )}
                   {bookingData.previousPhysiotherapy && (
                     <div>
-                      <span className="text-gray-600 text-base block mb-2">
+                      <span className="text-gray-600 text-[16px] sm:text-[18px] block mb-2">
                         Previous Physiotherapy:
                       </span>
-                      <p className="text-base bg-white p-3 rounded border text-gray-700 font-uber">
+                      <p className="text-[16px] sm:text-[18px] bg-white p-3 rounded border text-gray-700 font-uber">
                         {bookingData.previousPhysiotherapy}
                       </p>
                     </div>
@@ -784,10 +780,10 @@ const BookingPage = () => {
 
               <div className="border-t border-gray-200 pt-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h6 className="font-semibold text-blue-800 mb-3 text-base">
+                  <h6 className="font-semibold text-blue-800 mb-3 text-[16px] sm:text-[18px]">
                     Important Notice
                   </h6>
-                  <ul className="text-base text-blue-700 space-y-2 list-disc list-inside">
+                  <ul className="text-[16px] sm:text-[18px] text-blue-700 space-y-2 list-disc list-inside">
                     <li>
                       We'll contact you within 24 hours to confirm your
                       appointment
@@ -813,22 +809,22 @@ const BookingPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="border-b border-gray-100 bg-white">
+        <div className="site-container py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <Link
               href="/"
-              className="flex items-center gap-3 text-[#0E2127] hover:text-[#FF3133] transition-colors group"
+              className="group flex items-center gap-3 text-[16px] font-semibold text-[#0E2127] transition-colors hover:text-[#FF3133]"
             >
               <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-              <span className="font-medium">Back to Home</span>
+              <span>Back to Home</span>
             </Link>
 
             <div className="sm:text-right">
-              <h3 className="text-lg sm:text-xl font-axiforma text-[#0E2127] mb-1">
+              <h3 className="mb-1 font-axiforma text-[24px] text-[#0E2127]">
                 Book Appointment
               </h3>
-              <p className="text-gray-600 text-base font-uber">
+              <p className="font-uber text-[16px] text-gray-600">
                 Schedule your physiotherapy session
               </p>
             </div>
@@ -837,7 +833,7 @@ const BookingPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <div className="site-container py-6 lg:py-8">
         {submitStatus === "success" && bookingResponse && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -845,31 +841,31 @@ const BookingPage = () => {
             className="bg-green-50 border-l-4 border-green-400 rounded-r-lg p-6 mb-8"
           >
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-green-100">
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-green-800 mb-2">
                   Booking Submitted Successfully!
                 </h3>
-                <p className="text-green-700 text-base mb-4 font-uber">
+                <p className="text-green-700 text-[16px] sm:text-[18px] mb-4 font-uber">
                   {bookingResponse.message}
                 </p>
                 {bookingResponse.booking && (
                   <div className="bg-green-100 rounded-lg p-4 space-y-2">
-                    <p className="text-base text-green-800 font-uber">
+                    <p className="text-[16px] sm:text-[18px] text-green-800 font-uber">
                       <span className="font-semibold">
                         Confirmation Number:
                       </span>{" "}
                       {bookingResponse.booking.confirmationNumber}
                     </p>
-                    <p className="text-base text-green-800 font-uber">
+                    <p className="text-[16px] sm:text-[18px] text-green-800 font-uber">
                       <span className="font-semibold">Date & Time:</span>{" "}
                       {bookingResponse.booking.date} at{" "}
                       {bookingResponse.booking.time}
                     </p>
                     {bookingResponse.booking.sessionType && (
-                      <p className="text-base text-green-800 font-uber">
+                      <p className="text-[16px] sm:text-[18px] text-green-800 font-uber">
                         <span className="font-semibold">Session:</span>{" "}
                         {bookingResponse.booking.sessionType} session (
                         {bookingResponse.booking.sessionDuration} minutes)
@@ -877,7 +873,7 @@ const BookingPage = () => {
                     )}
                   </div>
                 )}
-                <p className="text-base text-green-600 mt-3 font-uber">
+                <p className="text-[16px] sm:text-[18px] text-green-600 mt-3 font-uber">
                   Redirecting to home page in 5 seconds...
                 </p>
               </div>
@@ -892,14 +888,14 @@ const BookingPage = () => {
             className="bg-red-50 border-l-4 border-red-400 rounded-r-lg p-6 mb-8"
           >
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-100">
                 <AlertCircle className="w-6 h-6 text-red-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-red-800 mb-2">
                   Booking Submission Failed
                 </h3>
-                <p className="text-red-700 text-base font-uber">
+                <p className="text-red-700 text-[16px] sm:text-[18px] font-uber">
                   {errorMessage ||
                     "Please try again or call us directly at +44 7460 091561"}
                 </p>
@@ -913,7 +909,7 @@ const BookingPage = () => {
           <ProgressStepper steps={stepTitles} currentStep={currentStep} />
         </div>
 
-        <div className="bg-white border  border-gray-200 rounded-xl overflow-hidden">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
           {/* Form Container */}
           <div className="p-4 sm:p-6 lg:p-8">
             {submitStatus !== "success" ? (
@@ -927,7 +923,7 @@ const BookingPage = () => {
                     type="button"
                     onClick={handlePrevious}
                     disabled={currentStep === 0}
-                    className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                    className={`w-full sm:w-auto flex items-center justify-center gap-2 rounded-full px-6 py-3.5 font-medium transition-all ${
                       currentStep === 0
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
@@ -937,25 +933,25 @@ const BookingPage = () => {
                     Previous
                   </button>
 
-                  {currentStep < 5 ? (
+                  {currentStep < finalStep ? (
                     <button
                       type="button"
                       onClick={handleNext}
                       disabled={!canProceedToNextStep()}
-                      className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-medium transition-all ${
+                      className={`w-full sm:w-auto flex items-center justify-center gap-2 rounded-full px-8 py-3.5 font-medium transition-all ${
                         canProceedToNextStep()
                           ? "bg-[#FF3133] text-white hover:bg-[#e62a2c] border border-[#FF3133]"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed border border-gray-300"
                       }`}
                     >
-                      {currentStep === 4 ? "Review Booking" : "Next"}
+                      Next
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   ) : (
                     <button
                       type="submit"
                       disabled={isSubmitting || !canProceedToNextStep()}
-                      className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-medium transition-all ${
+                      className={`w-full sm:w-auto flex items-center justify-center gap-2 rounded-full px-8 py-3.5 font-medium transition-all ${
                         isSubmitting || !canProceedToNextStep()
                           ? "bg-gray-400 cursor-not-allowed border border-gray-400"
                           : "bg-[#FF3133] hover:bg-[#e62a2c] text-white border border-[#FF3133]"
@@ -963,7 +959,7 @@ const BookingPage = () => {
                     >
                       {isSubmitting ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                           Submitting...
                         </>
                       ) : (
@@ -975,19 +971,19 @@ const BookingPage = () => {
               </form>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-base font-axiforma text-[#0E2127] mb-2">
+                <h3 className="text-[16px] sm:text-[18px] font-axiforma text-[#0E2127] mb-2">
                   Booking Completed Successfully!
                 </h3>
-                <p className="text-gray-600 text-base font-uber mb-6">
+                <p className="text-gray-600 text-[16px] sm:text-[18px] font-uber mb-6">
                   Your appointment has been submitted and we'll contact you
                   within 24 hours to confirm.
                 </p>
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF3133] text-white rounded-lg hover:bg-[#e62a2c] transition-colors font-medium"
+                  className="btn-primary"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Return to Home
@@ -998,7 +994,7 @@ const BookingPage = () => {
             {/* Footer Notice - Only show when form is visible */}
             {submitStatus !== "success" && (
               <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                <p className="text-base text-gray-600 font-uber leading-relaxed">
+                <p className="text-[16px] sm:text-[18px] text-gray-600 font-uber leading-relaxed">
                   * Required fields. We'll contact you within 24 hours to
                   confirm your appointment.
                   <br />

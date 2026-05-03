@@ -263,7 +263,7 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
               >
                 <div className="text-center">
                   <div className="font-semibold">{slot}</div>
-                  <div className="text-base opacity-75 mt-1">
+                  <div className="text-[16px] sm:text-[18px] opacity-75 mt-1">
                     {formatTimeDisplay(slot)}
                   </div>
                 </div>
@@ -319,7 +319,7 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
           >
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#FF3133]" />
-              <span className="text-[#FF3133] font-medium text-base">
+              <span className="text-[#FF3133] font-medium text-[16px] sm:text-[18px]">
                 Selected: {selectedTime} ({formatTimeDisplay(selectedTime)})
               </span>
             </div>
@@ -327,7 +327,7 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
         )}
 
         {/* Additional Info */}
-        <div className="mt-4 text-base text-gray-500">
+        <div className="mt-4 text-[16px] sm:text-[18px] text-gray-500">
           <p>• Time slots are based on current clinic availability</p>
           <p>• Blocked times and existing appointments are excluded</p>
           <p>• All times are displayed in local time</p>

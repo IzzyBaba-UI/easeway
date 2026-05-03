@@ -2,10 +2,10 @@ import RevealOnScroll from "../animations/Reveal";
 
 const Info = () => {
   return (
-    <div className="py-12 sm:py-14 md:py-16 lg:py-20 items-center flex flex-col gap-6 sm:gap-8 md:gap-10 justify-center text-center">
-      <div className="mx-auto text-center text-button-sm sm:text-button font-uber md:text-body-lg lg:text-body-lg px-4 sm:px-6 md:px-8 lg:px-0 max-w-4xl lg:w-1/2">
+    <div className="flex flex-col items-center justify-center gap-6 py-12 text-center sm:gap-8 sm:py-14 md:gap-10 md:py-16 lg:py-20">
+      <div className="mx-auto max-w-3xl px-4 text-center font-uber sm:px-6 md:px-8 lg:px-0">
         <RevealOnScroll>
-          <p className="text-body leading-relaxed font-uber">
+          <p className="font-uber text-[18px] leading-8 text-gray-700">
             At Easeway Medicare Physiotherapy Clinic, we believe that everyone
             deserves to live without pain and move freely. Our dedicated team
             provides personalized, evidence-based treatments that address the
@@ -20,7 +20,7 @@ const Info = () => {
               .getElementById("services")
               ?.scrollIntoView({ behavior: "smooth" })
           }
-          className="bg-[#0E2127] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-medium text-button-sm sm:text-button font-uber transition-all duration-300 hover:bg-[#1a2d35] hover:scale-105"
+          className="btn-dark"
         >
           Learn More About Our Services
         </button>

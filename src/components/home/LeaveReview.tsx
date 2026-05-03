@@ -9,7 +9,7 @@ const LeaveReview = () => {
 
   return (
     <section className="py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -18,12 +18,12 @@ const LeaveReview = () => {
           className="text-center"
         >
           {/* Main Content */}
-          <div className="bg-white/40 backdrop-blur-md border border-white/20 rounded-xl p-6 sm:p-8">
-            <h2 className="text-h4-mobile md:text-h3-small font-axiforma text-gray-900 mb-3 tracking-tight">
+          <div className="rounded-lg border border-white/20 bg-white/40 p-6 backdrop-blur-md sm:p-8">
+            <h2 className="mb-3 font-axiforma text-[24px] tracking-tight text-gray-900 sm:text-[26px]">
               Love Our Service?
             </h2>
 
-            <p className="text-body-sm md:text-body text-gray-600 mb-6 max-w-lg mx-auto">
+            <p className="mx-auto mb-6 max-w-lg text-[17px] leading-7 text-gray-600">
               Help others discover our care by sharing your experience on
               Google.
             </p>
@@ -43,7 +43,7 @@ const LeaveReview = () => {
               href={googleReviewUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0e2127] hover:bg-[#101f24] text-white font-semibold rounded-xl transition-all duration-300 text-body-sm sm:text-body"
+              className="btn-dark"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

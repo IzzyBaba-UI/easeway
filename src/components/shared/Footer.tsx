@@ -13,7 +13,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 to-black border-t border-gray-800/50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="site-container">
         {/* Main Footer Content */}
         <div className="py-12 sm:py-14 md:py-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
           {/* Brand Section */}
@@ -33,17 +33,17 @@ const Footer = () => {
                 />
               </div>
               <div>
-                <h3 className="text-h6-mobile sm:text-h6-desktop font-axiforma text-white">
+                <h3 className="font-axiforma text-[20px] text-white">
                   Easeway Medicare
                 </h3>
-                <p className="text-body text-gray-400 font-uber">
+                <p className="font-uber text-[16px] text-gray-400">
                   Physiotherapy Clinic
                 </p>
               </div>
             </motion.div>
 
             <motion.p
-              className="text-body-sm sm:text-body text-gray-400 leading-relaxed mb-6 sm:mb-8 max-w-sm font-uber"
+              className="mb-6 max-w-sm font-uber text-[16px] leading-7 text-gray-400 sm:mb-8"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
@@ -57,7 +57,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <motion.h4
-              className="text-base sm:text-h6-mobile md:text-h6-desktop font-axiforma mb-4 sm:mb-6 text-white"
+              className="mb-4 font-axiforma text-[18px] text-white sm:mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -76,7 +76,7 @@ const Footer = () => {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-gray-400 hover:text-white transition-all duration-300 font-light text-button-sm sm:text-button font-uber block"
+                    className="block font-uber text-[16px] font-light text-gray-400 transition-all duration-300 hover:text-white"
                   >
                     {link.label}
                   </a>
@@ -88,7 +88,7 @@ const Footer = () => {
           {/* Contact Info */}
           <div className="sm:col-span-2 lg:col-span-1">
             <motion.h4
-              className="text-base sm:text-h6-mobile md:text-h6-desktop font-axiforma mb-4 sm:mb-6 text-white"
+              className="mb-4 font-axiforma text-[18px] text-white sm:mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -110,7 +110,7 @@ const Footer = () => {
                 <div>
                   <a
                     href="tel:+447460091561"
-                    className="text-white hover:text-gray-300 font-medium transition-colors text-base"
+                    className="text-[16px] font-medium text-white transition-colors hover:text-gray-300"
                   >
                     +44 7460 091561
                   </a>
@@ -124,7 +124,7 @@ const Footer = () => {
                 <div className="flex-1 min-w-0">
                   <a
                     href="mailto:easeway.physiotherapy@easewaymedicare.co.uk"
-                    className="text-white hover:text-gray-300 transition-colors text-base sm:text-base font-light break-all"
+                    className="break-all text-[16px] font-light text-white transition-colors hover:text-gray-300"
                   >
                     easeway.physiotherapy@easewaymedicare.co.uk
                   </a>
@@ -136,7 +136,7 @@ const Footer = () => {
                   <MapPin className="text-gray-400 w-3 h-3" />
                 </div>
                 <div>
-                  <p className="text-white font-light leading-relaxed text-body font-uber">
+                  <p className="font-uber text-[16px] font-light leading-7 text-white">
                     Manor Leisure Centre
                     <br />
                     PE7 1UA, Whittlesey
@@ -155,7 +155,7 @@ const Footer = () => {
                     href="https://www.easewaymedicare.co.uk"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white hover:text-gray-300 transition-colors text-button-sm sm:text-button font-uber font-light"
+                    className="font-uber text-[16px] font-light text-white transition-colors hover:text-gray-300"
                   >
                     www.easewaymedicare.co.uk
                   </a>
@@ -173,7 +173,7 @@ const Footer = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <p className="text-gray-500 font-light px-4 text-body font-uber">
+          <p className="px-4 font-uber text-[15px] font-light text-gray-500">
             &copy; {new Date().getFullYear()} Easeway Medicare Physiotherapy
             Clinic. All rights reserved.
           </p>
