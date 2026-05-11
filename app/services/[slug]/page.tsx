@@ -191,7 +191,7 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
           <div className="site-container grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="max-w-3xl">
               <p className="section-eyebrow">Service Overview</p>
-              <h2 className="section-title mt-3">What this service helps with</h2>
+              
               <p className="mt-5 text-[18px] leading-8 text-gray-600">
                 {service.intro}
               </p>

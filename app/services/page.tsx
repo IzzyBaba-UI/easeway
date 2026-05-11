@@ -93,9 +93,7 @@ export default function ServicesPage() {
           <div className="site-container">
             <div className="max-w-3xl">
               <p className="section-eyebrow">Service Directory</p>
-              <h2 className="section-title mt-3">
-                Individual physiotherapy pages for clients and search engines
-              </h2>
+             
               <p className="mt-4 max-w-2xl text-[18px] leading-7 text-gray-600">
                 Each service page explains who the treatment is for, what is
                 included, what to expect, and common questions clients ask

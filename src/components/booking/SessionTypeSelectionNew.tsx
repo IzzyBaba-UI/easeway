@@ -53,6 +53,8 @@ const pricingConfig: Record<
     followupDuration: 30,
   },
   acupuncture: {
+    new: "£50",
+    followup: "£45",
     newDuration: 60,
     followupDuration: 45,
   },
