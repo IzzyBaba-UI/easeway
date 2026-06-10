@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +22,14 @@ import ProgressStepper from "../../src/components/ui/ProgressStepper";
 import { useToast } from "../../src/contexts/ToastContext";
 import HomeVisitBookingForm from "../../src/components/booking/HomeVisitBookingForm";
 import Footer from "@/components/shared/Footer";
+
+const validServiceCategories = [
+  "clinic",
+  "home",
+  "virtual",
+  "sports",
+  "acupuncture",
+] as const;
 
 // Main booking page component
 const BookingPage = () => {
@@ -59,6 +67,58 @@ const BookingPage = () => {
     "Appointment",
     "Review",
   ];
+  const hasAppliedInitialService = useRef(false);
+
+  // Handle service category selection with home visit check
+  const handleServiceTypeSelect = useCallback(
+    (serviceKey: string) => {
+      updateBookingData({
+        serviceCategory: serviceKey as
+          | "clinic"
+          | "home"
+          | "virtual"
+          | "sports"
+          | "acupuncture",
+      });
+
+      if (serviceKey === "home" || serviceKey === "virtual") {
+        setVirtualMode(serviceKey === "virtual");
+        setShowHomeVisitForm(true);
+      } else {
+        setShowHomeVisitForm(false);
+        setVirtualMode(false);
+      }
+    },
+    [updateBookingData]
+  );
+
+  useEffect(() => {
+    if (hasAppliedInitialService.current) {
+      return;
+    }
+
+    const requestedService = new URLSearchParams(window.location.search).get(
+      "service"
+    );
+
+    if (
+      !requestedService ||
+      !validServiceCategories.includes(
+        requestedService as (typeof validServiceCategories)[number]
+      )
+    ) {
+      hasAppliedInitialService.current = true;
+      return;
+    }
+
+    handleServiceTypeSelect(requestedService);
+
+    if (requestedService !== "home" && requestedService !== "virtual") {
+      setCurrentStep(1);
+    }
+
+    hasAppliedInitialService.current = true;
+  }, [handleServiceTypeSelect, setCurrentStep]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -310,26 +370,6 @@ const BookingPage = () => {
   };
 
   const today = new Date().toISOString().split("T")[0];
-
-  // Handle service category selection with home visit check
-  const handleServiceTypeSelect = (serviceKey: string) => {
-    updateBookingData({
-      serviceCategory: serviceKey as
-        | "clinic"
-        | "home"
-        | "virtual"
-        | "sports"
-        | "acupuncture",
-    });
-
-    if (serviceKey === "home" || serviceKey === "virtual") {
-      setVirtualMode(serviceKey === "virtual");
-      setShowHomeVisitForm(true);
-    } else {
-      setShowHomeVisitForm(false);
-      setVirtualMode(false);
-    }
-  };
 
   const handleBackFromHomeVisit = () => {
     setShowHomeVisitForm(false);

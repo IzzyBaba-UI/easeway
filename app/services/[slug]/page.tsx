@@ -88,6 +88,9 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
   const Icon = service.icon;
   const relatedServices = getRelatedServices(service.slug);
   const serviceUrl = `${baseUrl}/services/${service.slug}`;
+  const bookingHref =
+    service.slug === "acupuncture" ? "/booking?service=acupuncture" : "/booking";
+  const bookingUrl = `${baseUrl}${bookingHref}`;
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
@@ -175,7 +178,7 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
               {service.heroTitle}
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/booking" className="btn-primary">
+              <Link href={bookingHref} className="btn-primary">
                 <Calendar className="h-5 w-5" />
                 Book Appointment
               </Link>
@@ -226,6 +229,8 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
                   </div>
                 </div>
               </div>
+              {/* {service.slug === "acupuncture" && (
+              )} */}
             </aside>
           </div>
         </section>
@@ -392,7 +397,7 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/booking"
+                href={bookingHref}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 font-axiforma text-[16px] font-semibold leading-none text-[#FF3133] transition-colors hover:bg-gray-100 sm:py-4"
               >
                 <Calendar className="h-5 w-5" />

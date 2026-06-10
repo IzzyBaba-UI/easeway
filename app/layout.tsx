@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import "../src/index.css";
-import "../src/fonts.css";
+
 import ClientProviders from "./providers";
 
 export const metadata: Metadata = {
@@ -110,8 +109,28 @@ export default function RootLayout({
             gtag('config', 'AW-17918838357');
           `}
         </Script>
+        <Script
+          id="google-tag-manager"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var
+f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MJWSBDNS');`,
+          }}
+        />
       </head>
       <body>
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-MJWSBDNS"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          ></iframe>
+        </noscript>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
